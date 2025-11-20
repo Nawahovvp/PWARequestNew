@@ -2306,7 +2306,7 @@
       /* Gallery Styles for #images tab */
       #images .gallery-container-images {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* ลด minmax */
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* เพิ่ม minmax จาก 120px เป็น 150px เพื่อรองรับรูปใหญ่ขึ้น */
         gap: 8px; /* ลด gap */
         max-height: 80vh;
         overflow-y: auto;
@@ -2337,7 +2337,7 @@
       }
       #images .gallery-thumbnail {
         width: 100%;
-        height: 100px; /* ลด height */
+        height: 150px; /* เพิ่ม height จาก 100px เป็น 150px เพื่อให้รูปใหญ่สูงขึ้น */
         object-fit: cover;
         border-radius: 8px;
         margin-bottom: 8px; /* ลด margin */
@@ -4298,11 +4298,6 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
             <div class="gallery-info">
               <div class="gallery-material" style="color: ${textColor}; font-weight: ${fontWeight};">${row.Material || ''}</div>
               <div class="gallery-description">${row.Description || ''}</div>
-            </div>
-            <div class="gallery-actions">
-              <button class="requisition-button-images" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
-                เบิก
-              </button>
             </div>
           `;
           galleryContainer.appendChild(galleryItem);
