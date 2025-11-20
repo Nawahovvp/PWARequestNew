@@ -3181,7 +3181,9 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
         navButtons.forEach((btn) => btn.classList.remove("active"));
         const clickedNav = document.querySelector(`[data-tab="${tabId}"]`);
         if (clickedNav) clickedNav.classList.add("active");
-        document.getElementById("loading").style.display = "flex";
+        if (tabId !== "pending-calls") {
+          document.getElementById("loading").style.display = "flex";
+        }
         if (tabId === "parts") {
           document.getElementById('searchInput1').value = globalSearch1;
           document.getElementById('searchInput2').value = globalSearch2;
