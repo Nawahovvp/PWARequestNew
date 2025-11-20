@@ -1,6 +1,6 @@
 {
   "name": "ระบบขอสั่งอะไหล่คลังสินค้านวนคร",
-  "short_name": "ขอสั่งอะไหล่",
+  "short_name": "Part GO",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
