@@ -57,6 +57,23 @@
     --header-bg: linear-gradient(135deg, #2c3e50, #34495e);
     --footer-bg: linear-gradient(135deg, #1abc9c, #16a085);
   }
+  /* Auto-detect dark mode via media query (fallback for PWA) */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #000000;
+          --bg-secondary: #2c3e50;
+          --bg-card: #34495e;
+          --text-primary: #ffffff;
+          --text-secondary: #bdc3c7;
+          --border-color: #555555;
+          --accent-blue: #1abc9c;
+          --accent-green: #1abc9c;
+          --accent-red: #e74c3c;
+          --shadow-light: rgba(0, 0, 0, 0.3);
+          --header-bg: linear-gradient(135deg, #2c3e50, #34495e);
+          --footer-bg: linear-gradient(135deg, #1abc9c, #16a085);
+        }
+      }
       body { 
     margin: 0;
     padding: 0;
@@ -169,12 +186,15 @@
       }
       body.dark-mode th {
         background: linear-gradient(135deg, #1abc9c, #16a085);
-        ccolor: var(--text-primary);
+        color: var(--text-primary); /* Fixed: was ccolor */
       }
-      body.dark-mode td {
-        border-color: #555;
-        color: var(--text-primary);
+      td { color: var(--text-primary); border-color: var(--border-color); }
+      body.dark-mode td { 
+        color: var(--text-secondary); 
+        border-color: var(--border-color); 
       }
+      body.dark-mode .modal-content, body.dark-mode .login-content { color: var(--text-primary); }
+      .modal-content, .login-content { color: var(--text-primary); }
       body.dark-mode tr:hover {
         background-color: #3d566e;
       }
@@ -208,7 +228,7 @@
       }
       body.dark-mode .swal2-popup {
         background: #2c3e50 !important;
-        color: #ecf0f1 !important;
+        color: var(--text-primary) !important; /* Use var instead of #ecf0f1 */
       }
       body.dark-mode .swal2-backdrop {
         background-color: rgba(0, 0, 0, 0.8) !important;
@@ -1264,7 +1284,7 @@
         transition: color 0.3s ease !important;
       }
       body.dark-mode .swal2-title {
-        color: #ecf0f1 !important;
+        color: var(--text-primary) !important;
       }
       .swal2-actions {
         margin-top: 8px !important; /* ลด margin */
@@ -2561,7 +2581,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
 }      
    </style>
   </head>
-  <body class="light-mode">
+  <body class="light-mode" data-theme="light"> <!-- Add data-theme for CSS selector -->
     <!-- Login Modal -->
     <div id="loginModal" class="login-modal active">
       <div class="login-content">
@@ -5339,6 +5359,24 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        document.body.classList.remove('dark-mode', 'light-mode');
+        document.body.classList.add(theme + '-mode');
+        // Update meta theme-color for PWA
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#1877f2');
+      }
+      function loadTheme() {
+        const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        setTheme(theme);
+        if (document.getElementById('themeSelect')) document.getElementById('themeSelect').value = theme;
+        // Listen for system changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          if (!localStorage.getItem('theme')) setTheme(e.matches ? 'dark' : 'light');
+        });
+      }
     </script>
   </body>
 </html>
