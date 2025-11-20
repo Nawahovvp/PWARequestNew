@@ -2522,7 +2522,7 @@ body.dark-mode #all .all-pagination .all-page-number.active,
 body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
   background: linear-gradient(135deg, #ff8c00, #e67e22) !important; /* ส้มเข้มสำหรับ dark mode */
   color: white !important;
-}      
+}
    </style>
   </head>
   <body class="light-mode">
@@ -3197,7 +3197,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
         } else if (tabId === "pending-calls") {
           loadPendingCallsData();
         }
-        hideLoading();
+        // Removed hideLoading() from here to allow load functions to control it
       }
       function hideLoading() {
         document.getElementById("loading").style.display = "none";
