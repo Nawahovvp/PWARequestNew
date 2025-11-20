@@ -4,12 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0, minimum-scale=1.0" />
     <title>ระบบขอสั่งอะไหล่คลังสินค้านวนคร</title>
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1877f2">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="ระบบขอสั่งอะไหล่">
     <!-- Enhanced Content Security Policy to reduce phishing risks -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob: https://drive.google.com https://lh3.googleusercontent.com; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
     <!-- Additional security headers via meta -->
@@ -2522,7 +2516,7 @@ body.dark-mode #all .all-pagination .all-page-number.active,
 body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
   background: linear-gradient(135deg, #ff8c00, #e67e22) !important; /* ส้มเข้มสำหรับ dark mode */
   color: white !important;
-}
+}      
    </style>
   </head>
   <body class="light-mode">
@@ -2881,843 +2875,523 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-      'use strict'; // Keep strict mode
-
-  document.addEventListener('DOMContentLoaded', function() {
-    // All global variables and code go here
-    // Global employee data
-    let employeeData = [];
-    // Global search values for syncing between parts and images tabs
-    let globalSearch1 = '';
-    let globalSearch2 = '';
-    // Global for today tab: toggle pending only
-    let currentFilter = 'pending'; // 'pending' or 'history'
-    // Sort config for today tab
-    let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
-    // Pagination config for today tab
-    let currentPageToday = 1;
-    let itemsPerPageToday = 20; // Default to 20 items per page
-    // Opensheet URL for Request sheet
-    const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
-    // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
-    const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
-    // Parts tab variables (moved up to avoid initialization error)
-    const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
-    const sheetName = "MainSap";
-    const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
-    const searchInput1 = document.getElementById("searchInput1");
-    const searchInput2 = document.getElementById("searchInput2");
-    const searchButton = document.getElementById("searchButton");
-    const tableBody = document.querySelector("#data-table tbody");
-        const tableContainerParts = document.querySelector("#parts .table-container");
-    const pagination = document.getElementById("pagination");
-    const pageNumbers = document.getElementById("pageNumbers");
-    const itemsPerPageSelect = document.getElementById("itemsPerPage");
-    const firstPageButton = document.getElementById("firstPage");
-    const prevPageButton = document.getElementById("prevPage");
-    const nextPageButton = document.getElementById("nextPage");
-    const lastPageButton = document.getElementById("lastPage");
-    const errorContainer = document.getElementById("error-container");
-    const retryButton = document.getElementById("retry-button");
-    let allData = [];
-    let tempFilteredData = [];
-    let currentPage = 1;
-    let itemsPerPage = 10;
-    let currentFilteredData = [];
-    // Images tab variables (moved up)
-    const searchInputImages1 = document.getElementById("searchInputImages1");
-    const searchInputImages2 = document.getElementById("searchInputImages2");
-    const searchButtonImages = document.getElementById("searchButtonImages");
-    const galleryContainer = document.getElementById("gallery-container-images");
-    const paginationImages = document.getElementById("paginationImages");
-    const pageNumbersImages = document.getElementById("pageNumbersImages");
-    const itemsPerPageSelectImages = document.getElementById("itemsPerPageImages");
-    const firstPageButtonImages = document.getElementById("firstPageImages");
-    const prevPageButtonImages = document.getElementById("prevPageImages");
-    const nextPageButtonImages = document.getElementById("nextPageImages");
-    const lastPageButtonImages = document.getElementById("lastPageImages");
-    const errorContainerImages = document.getElementById("error-container-images");
-    const retryButtonImages = document.getElementById("retry-button-images");
-    let allDataImages = [];
-    let tempFilteredDataImages = [];
-    let currentPageImages = 1;
-    let itemsPerPageImages = 10;
-    let currentFilteredDataImages = [];
-    // Today tab variables (moved up)
-    const modal = document.getElementById("detailModal");
-    const modalContent = document.getElementById("modalContent");
-    const closeModal = document.getElementById("closeModal");
-    const searchInputToday = document.getElementById("searchInputToday");
-    const tableBodyToday = document.querySelector("#data-table-today tbody");
-    const errorContainerToday = document.getElementById("error-container-today");
-    const retryButtonToday = document.getElementById("retry-button-today");
-    const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
-    // Pagination elements for today tab
-    const paginationToday = document.getElementById("paginationToday");
-    const pageNumbersToday = document.getElementById("pageNumbersToday");
-    const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
-    const firstPageButtonToday = document.getElementById("firstPageToday");
-    const prevPageButtonToday = document.getElementById("prevPageToday");
-    const nextPageButtonToday = document.getElementById("nextPageToday");
-    const lastPageButtonToday = document.getElementById("lastPageToday");
-    let allDataToday = [];
-    let currentFilteredDataToday = [];
-    // All tab variables (moved up)
-    const modalAll = document.getElementById("detailModalAll");
-    const modalContentAll = document.getElementById("modalContentAll");
-    const closeModalAll = document.getElementById("closeModalAll");
-    const searchInputAll = document.getElementById("searchInputAll");
-    const tableBodyAll = document.querySelector("#data-table-all tbody");
-    const pageNumbersContainerAll = document.getElementById("pageNumbersAll");
-    const firstPageButtonAll = document.getElementById("firstPageAll");
-    const prevPageButtonAll = document.getElementById("prevPageAll");
-    const nextPageButtonAll = document.getElementById("nextPageAll");
-    const lastPageButtonAll = document.getElementById("lastPageAll");
-    const itemsPerPageSelectAll = document.getElementById("itemsPerPageAll");
-    let allDataAll = [];
-    let currentPageAll = 1;
-    let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
-    // Pending calls tab variables (moved up)
-    const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
-    const sheetNamePending = 'Call_Report';
-    const urlPending = `https://opensheet.elk.sh/${sheetIDPending}/${sheetNamePending}`;
-    const modalPending = document.getElementById("detailModalPending");
-    const modalContentPending = document.getElementById("modalContentPending");
-    const closeModalPending = document.getElementById("closeModalPending");
-    const teamFilterPending = document.getElementById("teamFilterPending");
-    const searchInputPending = document.getElementById("searchInputPending");
-    const searchButtonPending = document.getElementById("searchButtonPending");
-    const tableBodyPending = document.querySelector("#data-table-pending tbody");
-    const pageNumbersContainerPending = document.getElementById("pageNumbersPending");
-    const firstPageButtonPending = document.getElementById("firstPagePending");
-    const prevPageButtonPending = document.getElementById("prevPagePending");
-    const nextPageButtonPending = document.getElementById("nextPagePending");
-    const lastPageButtonPending = document.getElementById("lastPagePending");
-    const itemsPerPageSelectPending = document.getElementById("itemsPerPagePending");
-    let allDataPending = [];
-    let currentPagePending = 1;
-    let itemsPerPagePending = 20;
-    let sortConfigPending = { column: null, direction: 'asc' };
-    // Image Modal Handling for #parts (moved up)
-    const imageModal = document.getElementById('imageModal');
-    const imageModalContent = document.getElementById('imageModalContent');
-    const closeImageModal = document.getElementById('closeImageModal');
-    closeImageModal.onclick = () => {
-      imageModal.style.display = 'none';
-    };
-    // Image Modal Handling for #images (moved up)
-    const imageModalImages = document.getElementById('imageModalImages');
-    const imageModalContentImages = document.getElementById('imageModalContentImages');
-    const closeImageModalImages = document.getElementById('closeImageModalImages');
-    closeImageModalImages.onclick = () => {
-      imageModalImages.style.display = 'none';
-    };
-    // Login System
-    const loginModal = document.getElementById('loginModal');
-    const appContent = document.getElementById('appContent');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginError = document.getElementById('loginError');
-    const rememberMeCheckbox = document.getElementById('rememberMe');
-    const togglePasswordIcon = document.getElementById('togglePassword');
-    const userNameSmall = document.getElementById('userNameSmall');
-    function togglePasswordVisibility() {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      togglePasswordIcon.classList.toggle('fa-eye-slash');
-      togglePasswordIcon.classList.toggle('fa-eye');
-    }
-    async function loadEmployeeData() {
-      const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
-      const employeeSheetName = "Employee";
-      const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
-      try {
-        const response = await fetch(employeeUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error("Error loading employee data:", error);
-        throw error;
-      }
-    }
-    async function handleLogin() {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-      loginError.style.display = 'none';
-      if (!username || !password) {
-        loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
-        loginError.style.display = 'block';
-        return;
-      }
-      try {
-        employeeData = await loadEmployeeData();
-        const expectedPassword = username.slice(-4);
-        const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
-        if (employee && employee.Name) {
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('username', username);
-          localStorage.setItem('userName', employee.Name);
-          if (rememberMeCheckbox.checked) {
-            localStorage.setItem('savedUsername', username);
-            localStorage.setItem('rememberMe', 'true');
-          } else {
-            localStorage.removeItem('savedUsername');
-            localStorage.removeItem('rememberMe');
-          }
-          checkLoginStatus();
-          // Focus on search input after login
-          setTimeout(() => {
-            const searchInput = document.getElementById('searchInput1');
-            if (searchInput) searchInput.focus();
-          }, 500);
-        } else {
-          loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
-          loginError.style.display = 'block';
-          passwordInput.value = ''; // Clear password on error
-        }
-      } catch (error) {
-        loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
-        loginError.style.display = 'block';
-        console.error('Login error:', error);
-      }
-    }
-    function checkLoginStatus() {
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      const savedUsername = localStorage.getItem('username');
-      if (isLoggedIn && savedUsername) {
-        loginModal.classList.remove('active');
-        appContent.classList.add('logged-in');
-        // userNameSmall.textContent = localStorage.getItem('userName') || ''; // Comment out or delete
-        // Auto-load default tab if needed
-        if (document.querySelector('.nav-btn.active')) {
-          showTab('parts');
-        }
-      } else {
-        loginModal.classList.add('active');
-        appContent.classList.remove('logged-in');
-        // userNameSmall.textContent = ''; // Comment out or delete
-        // Clear invalid session
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('username');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('savedPassword'); // Clear saved password on invalid session
-      }
-      // Load saved credentials if remember me was checked
-      if (localStorage.getItem('rememberMe') === 'true') {
-        const savedUsername = localStorage.getItem('savedUsername');
-        if (savedUsername) usernameInput.value = savedUsername;
-        rememberMeCheckbox.checked = true;
-      }
-    }
-    function handleLogout() {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('username');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('savedUsername');
-      localStorage.removeItem('savedPassword');
-      localStorage.removeItem('rememberMe');
-      checkLoginStatus();
-      // Close settings modal if open
-      document.getElementById('settingsModal').style.display = 'none';
-    }
-    // Allow Enter key for login
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        handleLogin();
-      }
-    });
-    function showTab(tabId) {
-      const contents = document.querySelectorAll(".tab-content");
-      contents.forEach((tab) => tab.classList.remove("active"));
-      const targetTab = document.getElementById(tabId);
-      targetTab.classList.add("active");
-      // Update bottom nav active state
-      const navButtons = document.querySelectorAll(".nav-btn");
-      navButtons.forEach((btn) => btn.classList.remove("active"));
-      const clickedNav = document.querySelector(`[data-tab="${tabId}"]`);
-      if (clickedNav) clickedNav.classList.add("active");
-      document.getElementById("loading").style.display = "flex";
-      if (tabId === "parts") {
-        document.getElementById('searchInput1').value = globalSearch1;
-        document.getElementById('searchInput2').value = globalSearch2;
-        loadData();
-      } else if (tabId === "images") {
-        document.getElementById('searchInputImages1').value = globalSearch1;
-        document.getElementById('searchInputImages2').value = globalSearch2;
-        loadImagesData();
-      } else if (tabId === "today") {
-        loadTodayData();
-      } else if (tabId === "all") {
-        loadAllData();
-      } else if (tabId === "pending-calls") {
-        loadPendingCallsData();
-      }
-      hideLoading();
-    }
-    function hideLoading() {
-      document.getElementById("loading").style.display = "none";
-    }
-    function showQRCode() {
-      Swal.fire({
-        title: '📷 สแกน QR Code',
-        html: `
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://request-nawanakorn.vercel.app/" alt="QR Code" class="swal2-qrcode" style="width: 150px; height: 150px;">
-          <p>สแกนเพื่อเข้าสู่ระบบขอเบิกอะไหล่</p>
-        `,
-        confirmButtonText: 'ปิด',
-        customClass: {
-          popup: 'swal2-popup',
-          title: 'swal2-title',
-          confirmButton: 'swal2-confirm'
-        }
-      });
-    }
-    // Unified function for showing detail modal (shared event for both tabs)
-    function showDetailModal(row, modalId, contentId) {
-      const fields = [
-        { key: 'Material', label: 'Material' },
-        { key: 'Description', label: 'Description' },
-        { key: 'วิภาวดี', label: 'วิภาวดี' },
-        { key: 'Unrestricted', label: 'นวนคร' },
-        { key: 'Rebuilt', label: 'Rebuilt' },
-        { key: 'หมายเหตุ', label: 'หมายเหตุ' },
-        { key: 'Product', label: 'Product' },
-        { key: 'OCRTAXT', label: 'Spec' }
-      ];
-      let html = '';
-      fields.forEach(field => {
-        let value = row[field.key] || '';
-        if (field.key === 'วิภาวดี' || field.key === 'Unrestricted') {
-          if (value && !isNaN(value)) {
-            value = Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
-          } else if (value === '0' || value === 0) {
-            value = '';
-          }
-        }
-        if ((field.key === 'หมายเหตุ' || field.key === 'Rebuilt') && value) {
-          value = `<span style="color: #d32f2f3.6sเธอพิมพ์ครบแล้วหรอใช่ครับ พิมพ์ครบแล้ว! ผมได้รวมโค้ดทั้งหมดไว้ใน DOMContentLoaded เพื่อแก้ error นั้น ให้คัดลอกส่วน <script> ด้านล่างนี้ไปวางแทนที่เดิมทั้งหมด (ลบโค้ดเก่าใน <script> ทิ้ง แล้ววางอันใหม่นี้แทน) ตรงท้ายไฟล์ HTML ก่อน </body> นะครับ. ทดสอบแล้ว ควรไม่มี error แล้ว.
-HTML<script>
-  'use strict'; // Keep strict mode
-
-  document.addEventListener('DOMContentLoaded', function() {
-    // Global employee data
-    let employeeData = [];
-    // Global search values for syncing between parts and images tabs
-    let globalSearch1 = '';
-    let globalSearch2 = '';
-    // Global for today tab: toggle pending only
-    let currentFilter = 'pending'; // 'pending' or 'history'
-    // Sort config for today tab
-    let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
-    // Pagination config for today tab
-    let currentPageToday = 1;
-    let itemsPerPageToday = 20; // Default to 20 items per page
-    // Opensheet URL for Request sheet
-    const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
-    // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
-    const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
-    // Parts tab variables (moved up to avoid initialization error)
-    const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
-    const sheetName = "MainSap";
-    const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
-    const searchInput1 = document.getElementById("searchInput1");
-    const searchInput2 = document.getElementById("searchInput2");
-    const searchButton = document.getElementById("searchButton");
-    const tableBody = document.querySelector("#data-table tbody");
-    const tableContainerParts = document.querySelector("#parts .table-container");
-    const pagination = document.getElementById("pagination");
-    const pageNumbers = document.getElementById("pageNumbers");
-    const itemsPerPageSelect = document.getElementById("itemsPerPage");
-    const firstPageButton = document.getElementById("firstPage");
-    const prevPageButton = document.getElementById("prevPage");
-    const nextPageButton = document.getElementById("nextPage");
-    const lastPageButton = document.getElementById("lastPage");
-    const errorContainer = document.getElementById("error-container");
-    const retryButton = document.getElementById("retry-button");
-    let allData = [];
-    let tempFilteredData = [];
-    let currentPage = 1;
-    let itemsPerPage = 10;
-    let currentFilteredData = [];
-    // Images tab variables (moved up)
-    const searchInputImages1 = document.getElementById("searchInputImages1");
-    const searchInputImages2 = document.getElementById("searchInputImages2");
-    const searchButtonImages = document.getElementById("searchButtonImages");
-    const galleryContainer = document.getElementById("gallery-container-images");
-    const paginationImages = document.getElementById("paginationImages");
-    const pageNumbersImages = document.getElementById("pageNumbersImages");
-    const itemsPerPageSelectImages = document.getElementById("itemsPerPageImages");
-    const firstPageButtonImages = document.getElementById("firstPageImages");
-    const prevPageButtonImages = document.getElementById("prevPageImages");
-    const nextPageButtonImages = document.getElementById("nextPageImages");
-    const lastPageButtonImages = document.getElementById("lastPageImages");
-    const errorContainerImages = document.getElementById("error-container-images");
-    const retryButtonImages = document.getElementById("retry-button-images");
-    let allDataImages = [];
-    let tempFilteredDataImages = [];
-    let currentPageImages = 1;
-    let itemsPerPageImages = 10;
-    let currentFilteredDataImages = [];
-    // Today tab variables (moved up)
-    const modal = document.getElementById("detailModal");
-    const modalContent = document.getElementById("modalContent");
-    const closeModal = document.getElementById("closeModal");
-    const searchInputToday = document.getElementById("searchInputToday");
-    const tableBodyToday = document.querySelector("#data-table-today tbody");
-    const errorContainerToday = document.getElementById("error-container-today");
-    const retryButtonToday = document.getElementById("retry-button-today");
-    const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
-    // Pagination elements for today tab
-    const paginationToday = document.getElementById("paginationToday");
-    const pageNumbersToday = document.getElementById("pageNumbersToday");
-    const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
-    const firstPageButtonToday = document.getElementById("firstPageToday");
-    const prevPageButtonToday = document.getElementById("prevPageToday");
-    const nextPageButtonToday = document.getElementById("nextPageToday");
-    const lastPageButtonToday = document.getElementById("lastPageToday");
-    let allDataToday = [];
-    let currentFilteredDataToday = [];
-    // All tab variables (moved up)
-    const modalAll = document.getElementById("detailModalAll");
-    const modalContentAll = document.getElementById("modalContentAll");
-    const closeModalAll = document.getElementById("closeModalAll");
-    const searchInputAll = document.getElementById("searchInputAll");
-    const tableBodyAll = document.querySelector("#data-table-all tbody");
-    const pageNumbersContainerAll = document.getElementById("pageNumbersAll");
-    const firstPageButtonAll = document.getElementById("firstPageAll");
-    const prevPageButtonAll = document.getElementById("prevPageAll");
-    const nextPageButtonAll = document.getElementById("nextPageAll");
-    const lastPageButtonAll = document.getElementById("lastPageAll");
-    const itemsPerPageSelectAll = document.getElementById("itemsPerPageAll");
-    let allDataAll = [];
-    let currentPageAll = 1;
-    let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
-    // Pending calls tab variables (moved up)
-    const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
-    const sheetNamePending = 'Call_Report';
-    const urlPending = `https://opensheet.elk.sh/${sheetIDPending}/${sheetNamePending}`;
-    const modalPending = document.getElementById("detailModalPending");
-    const modalContentPending = document.getElementById("modalContentPending");
-    const closeModalPending = document.getElementById("closeModalPending");
-    const teamFilterPending = document.getElementById("teamFilterPending");
-    const searchInputPending = document.getElementById("searchInputPending");
-    const searchButtonPending = document.getElementById("searchButtonPending");
-    const tableBodyPending = document.querySelector("#data-table-pending tbody");
-    const pageNumbersContainerPending = document.getElementById("pageNumbersPending");
-    const firstPageButtonPending = document.getElementById("firstPagePending");
-    const prevPageButtonPending = document.getElementById("prevPagePending");
-    const nextPageButtonPending = document.getElementById("nextPagePending");
-    const lastPageButtonPending = document.getElementById("lastPagePending");
-    const itemsPerPageSelectPending = document.getElementById("itemsPerPagePending");
-    let allDataPending = [];
-    let currentPagePending = 1;
-    let itemsPerPagePending = 20;
-    let sortConfigPending = { column: null, direction: 'asc' };
-    // Image Modal Handling for #parts (moved up)
-    const imageModal = document.getElementById('imageModal');
-    const imageModalContent = document.getElementById('imageModalContent');
-    const closeImageModal = document.getElementById('closeImageModal');
-    closeImageModal.onclick = () => {
-      imageModal.style.display = 'none';
-    };
-    // Image Modal Handling for #images (moved up)
-    const imageModalImages = document.getElementById('imageModalImages');
-    const imageModalContentImages = document.getElementById('imageModalContentImages');
-    const closeImageModalImages = document.getElementById('closeImageModalImages');
-    closeImageModalImages.onclick = () => {
-      imageModalImages.style.display = 'none';
-    };
-    // Theme Management
-    function setTheme(theme) {
-      localStorage.setItem('theme', theme);
-      document.body.classList.remove('dark-mode', 'light-mode');
-      document.body.classList.add(theme + '-mode');
-    }
-    function loadTheme() {
-      const theme = localStorage.getItem('theme') || 'light';
-      setTheme(theme);
-      if (document.getElementById('themeSelect')) {
-        document.getElementById('themeSelect').value = theme;
-      }
-    }
-    function showSettings() {
-      const currentTheme = localStorage.getItem('theme') || 'light';
-      document.getElementById('modalUserName').textContent = localStorage.getItem('userName') || '';
-      document.getElementById('themeSelect').value = currentTheme;
-      document.getElementById('settingsModal').style.display = 'block';
-      // Add event for theme change in modal
-      document.getElementById('themeSelect').onchange = (e) => {
-        setTheme(e.target.value);
-      };
-    }
-    // Close settings modal
-    document.getElementById('closeSettings').onclick = () => {
-      document.getElementById('settingsModal').style.display = 'none';
-    };
-    window.onclick = (event) => {
-      const settingsModal = document.getElementById('settingsModal');
-      if (event.target === settingsModal) {
-        settingsModal.style.display = 'none';
-      }
-      // Existing modals...
-      if (event.target == modal) closeModal.click();
-      if (event.target == modalAll) closeModalAll.click();
-      if (event.target == modalPending) closeModalPending.click();
-      // Image modals
-      if (event.target === imageModal) {
+      'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
+      // Global employee data
+      let employeeData = [];
+      // Global search values for syncing between parts and images tabs
+      let globalSearch1 = '';
+      let globalSearch2 = '';
+      // Global for today tab: toggle pending only
+      let currentFilter = 'pending'; // 'pending' or 'history'
+      // Sort config for today tab
+      let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
+      // Pagination config for today tab
+      let currentPageToday = 1;
+      let itemsPerPageToday = 20; // Default to 20 items per page
+      // Opensheet URL for Request sheet
+      const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
+      // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
+      const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
+      // Parts tab variables (moved up to avoid initialization error)
+      const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
+      const sheetName = "MainSap";
+      const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+      const searchInput1 = document.getElementById("searchInput1");
+      const searchInput2 = document.getElementById("searchInput2");
+      const searchButton = document.getElementById("searchButton");
+      const tableBody = document.querySelector("#data-table tbody");
+          const tableContainerParts = document.querySelector("#parts .table-container");
+      const pagination = document.getElementById("pagination");
+      const pageNumbers = document.getElementById("pageNumbers");
+      const itemsPerPageSelect = document.getElementById("itemsPerPage");
+      const firstPageButton = document.getElementById("firstPage");
+      const prevPageButton = document.getElementById("prevPage");
+      const nextPageButton = document.getElementById("nextPage");
+      const lastPageButton = document.getElementById("lastPage");
+      const errorContainer = document.getElementById("error-container");
+      const retryButton = document.getElementById("retry-button");
+      let allData = [];
+      let tempFilteredData = [];
+      let currentPage = 1;
+      let itemsPerPage = 10;
+      let currentFilteredData = [];
+      // Images tab variables (moved up)
+      const searchInputImages1 = document.getElementById("searchInputImages1");
+      const searchInputImages2 = document.getElementById("searchInputImages2");
+      const searchButtonImages = document.getElementById("searchButtonImages");
+      const galleryContainer = document.getElementById("gallery-container-images");
+      const paginationImages = document.getElementById("paginationImages");
+      const pageNumbersImages = document.getElementById("pageNumbersImages");
+      const itemsPerPageSelectImages = document.getElementById("itemsPerPageImages");
+      const firstPageButtonImages = document.getElementById("firstPageImages");
+      const prevPageButtonImages = document.getElementById("prevPageImages");
+      const nextPageButtonImages = document.getElementById("nextPageImages");
+      const lastPageButtonImages = document.getElementById("lastPageImages");
+      const errorContainerImages = document.getElementById("error-container-images");
+      const retryButtonImages = document.getElementById("retry-button-images");
+      let allDataImages = [];
+      let tempFilteredDataImages = [];
+      let currentPageImages = 1;
+      let itemsPerPageImages = 10;
+      let currentFilteredDataImages = [];
+      // Today tab variables (moved up)
+      const modal = document.getElementById("detailModal");
+      const modalContent = document.getElementById("modalContent");
+      const closeModal = document.getElementById("closeModal");
+      const searchInputToday = document.getElementById("searchInputToday");
+      const tableBodyToday = document.querySelector("#data-table-today tbody");
+      const errorContainerToday = document.getElementById("error-container-today");
+      const retryButtonToday = document.getElementById("retry-button-today");
+      const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
+      // Pagination elements for today tab
+      const paginationToday = document.getElementById("paginationToday");
+      const pageNumbersToday = document.getElementById("pageNumbersToday");
+      const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
+      const firstPageButtonToday = document.getElementById("firstPageToday");
+      const prevPageButtonToday = document.getElementById("prevPageToday");
+      const nextPageButtonToday = document.getElementById("nextPageToday");
+      const lastPageButtonToday = document.getElementById("lastPageToday");
+      let allDataToday = [];
+      let currentFilteredDataToday = [];
+      // All tab variables (moved up)
+      const modalAll = document.getElementById("detailModalAll");
+      const modalContentAll = document.getElementById("modalContentAll");
+      const closeModalAll = document.getElementById("closeModalAll");
+      const searchInputAll = document.getElementById("searchInputAll");
+      const tableBodyAll = document.querySelector("#data-table-all tbody");
+      const pageNumbersContainerAll = document.getElementById("pageNumbersAll");
+      const firstPageButtonAll = document.getElementById("firstPageAll");
+      const prevPageButtonAll = document.getElementById("prevPageAll");
+      const nextPageButtonAll = document.getElementById("nextPageAll");
+      const lastPageButtonAll = document.getElementById("lastPageAll");
+      const itemsPerPageSelectAll = document.getElementById("itemsPerPageAll");
+      let allDataAll = [];
+      let currentPageAll = 1;
+      let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
+      // Pending calls tab variables (moved up)
+      const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
+      const sheetNamePending = 'Call_Report';
+      const urlPending = `https://opensheet.elk.sh/${sheetIDPending}/${sheetNamePending}`;
+      const modalPending = document.getElementById("detailModalPending");
+      const modalContentPending = document.getElementById("modalContentPending");
+      const closeModalPending = document.getElementById("closeModalPending");
+      const teamFilterPending = document.getElementById("teamFilterPending");
+      const searchInputPending = document.getElementById("searchInputPending");
+      const searchButtonPending = document.getElementById("searchButtonPending");
+      const tableBodyPending = document.querySelector("#data-table-pending tbody");
+      const pageNumbersContainerPending = document.getElementById("pageNumbersPending");
+      const firstPageButtonPending = document.getElementById("firstPagePending");
+      const prevPageButtonPending = document.getElementById("prevPagePending");
+      const nextPageButtonPending = document.getElementById("nextPagePending");
+      const lastPageButtonPending = document.getElementById("lastPagePending");
+      const itemsPerPageSelectPending = document.getElementById("itemsPerPagePending");
+      let allDataPending = [];
+      let currentPagePending = 1;
+      let itemsPerPagePending = 20;
+      let sortConfigPending = { column: null, direction: 'asc' };
+      // Image Modal Handling for #parts (moved up)
+      const imageModal = document.getElementById('imageModal');
+      const imageModalContent = document.getElementById('imageModalContent');
+      const closeImageModal = document.getElementById('closeImageModal');
+      closeImageModal.onclick = () => {
         imageModal.style.display = 'none';
-      }
-      if (event.target === imageModalImages) {
+      };
+      // Image Modal Handling for #images (moved up)
+      const imageModalImages = document.getElementById('imageModalImages');
+      const imageModalContentImages = document.getElementById('imageModalContentImages');
+      const closeImageModalImages = document.getElementById('closeImageModalImages');
+      closeImageModalImages.onclick = () => {
         imageModalImages.style.display = 'none';
+      };
+      // Theme Management
+      function setTheme(theme) {
+        localStorage.setItem('theme', theme);
+        document.body.classList.remove('dark-mode', 'light-mode');
+        document.body.classList.add(theme + '-mode');
       }
-    };
-    // Login System
-    const loginModal = document.getElementById('loginModal');
-    const appContent = document.getElementById('appContent');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginError = document.getElementById('loginError');
-    const rememberMeCheckbox = document.getElementById('rememberMe');
-    const togglePasswordIcon = document.getElementById('togglePassword');
-    const userNameSmall = document.getElementById('userNameSmall');
-    function togglePasswordVisibility() {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      togglePasswordIcon.classList.toggle('fa-eye-slash');
-      togglePasswordIcon.classList.toggle('fa-eye');
-    }
-    async function loadEmployeeData() {
-      const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
-      const employeeSheetName = "Employee";
-      const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
-      try {
-        const response = await fetch(employeeUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+      function loadTheme() {
+        const theme = localStorage.getItem('theme') || 'light';
+        setTheme(theme);
+        if (document.getElementById('themeSelect')) {
+          document.getElementById('themeSelect').value = theme;
         }
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error("Error loading employee data:", error);
-        throw error;
       }
-    }
-    async function handleLogin() {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-      loginError.style.display = 'none';
-      if (!username || !password) {
-        loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
-        loginError.style.display = 'block';
-        return;
+      function showSettings() {
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.getElementById('modalUserName').textContent = localStorage.getItem('userName') || '';
+        document.getElementById('themeSelect').value = currentTheme;
+        document.getElementById('settingsModal').style.display = 'block';
+        // Add event for theme change in modal
+        document.getElementById('themeSelect').onchange = (e) => {
+          setTheme(e.target.value);
+        };
       }
-      try {
-        employeeData = await loadEmployeeData();
-        const expectedPassword = username.slice(-4);
-        const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
-        if (employee && employee.Name) {
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('username', username);
-          localStorage.setItem('userName', employee.Name);
-          if (rememberMeCheckbox.checked) {
-            localStorage.setItem('savedUsername', username);
-            localStorage.setItem('rememberMe', 'true');
-          } else {
-            localStorage.removeItem('savedUsername');
-            localStorage.removeItem('rememberMe');
+      // Close settings modal
+      document.getElementById('closeSettings').onclick = () => {
+        document.getElementById('settingsModal').style.display = 'none';
+      };
+      window.onclick = (event) => {
+        const settingsModal = document.getElementById('settingsModal');
+        if (event.target === settingsModal) {
+          settingsModal.style.display = 'none';
+        }
+        // Existing modals...
+        if (event.target == modal) closeModal.click();
+        if (event.target == modalAll) closeModalAll.click();
+        if (event.target == modalPending) closeModalPending.click();
+        // Image modals
+        if (event.target === imageModal) {
+          imageModal.style.display = 'none';
+        }
+        if (event.target === imageModalImages) {
+          imageModalImages.style.display = 'none';
+        }
+      };
+      // Login System
+      const loginModal = document.getElementById('loginModal');
+      const appContent = document.getElementById('appContent');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const loginError = document.getElementById('loginError');
+      const rememberMeCheckbox = document.getElementById('rememberMe');
+      const togglePasswordIcon = document.getElementById('togglePassword');
+      const userNameSmall = document.getElementById('userNameSmall');
+      function togglePasswordVisibility() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        togglePasswordIcon.classList.toggle('fa-eye-slash');
+        togglePasswordIcon.classList.toggle('fa-eye');
+      }
+      async function loadEmployeeData() {
+        const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
+        const employeeSheetName = "Employee";
+        const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
+        try {
+          const response = await fetch(employeeUrl);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
-          checkLoginStatus();
-          // Focus on search input after login
-          setTimeout(() => {
-            const searchInput = document.getElementById('searchInput1');
-            if (searchInput) searchInput.focus();
-          }, 500);
-        } else {
-          loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
-          loginError.style.display = 'block';
-          passwordInput.value = ''; // Clear password on error
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Error loading employee data:", error);
+          throw error;
         }
-      } catch (error) {
-        loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
-        loginError.style.display = 'block';
-        console.error('Login error:', error);
       }
-    }
-    function checkLoginStatus() {
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      const savedUsername = localStorage.getItem('username');
-      if (isLoggedIn && savedUsername) {
-        loginModal.classList.remove('active');
-        appContent.classList.add('logged-in');
-        // Auto-load default tab if needed
-        if (document.querySelector('.nav-btn.active')) {
-          showTab('parts');
+      async function handleLogin() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        loginError.style.display = 'none';
+        if (!username || !password) {
+          loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+          loginError.style.display = 'block';
+          return;
         }
-      } else {
-        loginModal.classList.add('active');
-        appContent.classList.remove('logged-in');
-        // Clear invalid session
+        try {
+          employeeData = await loadEmployeeData();
+          const expectedPassword = username.slice(-4);
+          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
+          if (employee && employee.Name) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('username', username);
+            localStorage.setItem('userName', employee.Name);
+            if (rememberMeCheckbox.checked) {
+              localStorage.setItem('savedUsername', username);
+              localStorage.setItem('rememberMe', 'true');
+            } else {
+              localStorage.removeItem('savedUsername');
+              localStorage.removeItem('rememberMe');
+            }
+            checkLoginStatus();
+            // Focus on search input after login
+            setTimeout(() => {
+              const searchInput = document.getElementById('searchInput1');
+              if (searchInput) searchInput.focus();
+            }, 500);
+          } else {
+            loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
+            loginError.style.display = 'block';
+            passwordInput.value = ''; // Clear password on error
+          }
+        } catch (error) {
+          loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
+          loginError.style.display = 'block';
+          console.error('Login error:', error);
+        }
+      }
+      function checkLoginStatus() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const savedUsername = localStorage.getItem('username');
+  if (isLoggedIn && savedUsername) {
+    loginModal.classList.remove('active');
+    appContent.classList.add('logged-in');
+    // userNameSmall.textContent = localStorage.getItem('userName') || ''; // Comment out or delete
+    // Auto-load default tab if needed
+    if (document.querySelector('.nav-btn.active')) {
+      showTab('parts');
+    }
+  } else {
+    loginModal.classList.add('active');
+    appContent.classList.remove('logged-in');
+    // userNameSmall.textContent = ''; // Comment out or delete
+    // Clear invalid session
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('savedPassword'); // Clear saved password on invalid session
+  }
+  // Load saved credentials if remember me was checked
+  if (localStorage.getItem('rememberMe') === 'true') {
+    const savedUsername = localStorage.getItem('savedUsername');
+    if (savedUsername) usernameInput.value = savedUsername;
+    rememberMeCheckbox.checked = true;
+  }
+}
+      function handleLogout() {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('username');
         localStorage.removeItem('userName');
-        localStorage.removeItem('savedPassword'); // Clear saved password on invalid session
+        localStorage.removeItem('savedUsername');
+        localStorage.removeItem('savedPassword');
+        localStorage.removeItem('rememberMe');
+        checkLoginStatus();
+        // Close settings modal if open
+        document.getElementById('settingsModal').style.display = 'none';
       }
-      // Load saved credentials if remember me was checked
-      if (localStorage.getItem('rememberMe') === 'true') {
-        const savedUsername = localStorage.getItem('savedUsername');
-        if (savedUsername) usernameInput.value = savedUsername;
-        rememberMeCheckbox.checked = true;
-      }
-    }
-    function handleLogout() {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('username');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('savedUsername');
-      localStorage.removeItem('savedPassword');
-      localStorage.removeItem('rememberMe');
-      checkLoginStatus();
-      // Close settings modal if open
-      document.getElementById('settingsModal').style.display = 'none';
-    }
-    // Allow Enter key for login
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        handleLogin();
-      }
-    });
-    function showTab(tabId) {
-      const contents = document.querySelectorAll(".tab-content");
-      contents.forEach((tab) => tab.classList.remove("active"));
-      const targetTab = document.getElementById(tabId);
-      targetTab.classList.add("active");
-      // Update bottom nav active state
-      const navButtons = document.querySelectorAll(".nav-btn");
-      navButtons.forEach((btn) => btn.classList.remove("active"));
-      const clickedNav = document.querySelector(`[data-tab="${tabId}"]`);
-      if (clickedNav) clickedNav.classList.add("active");
-      document.getElementById("loading").style.display = "flex";
-      if (tabId === "parts") {
-        document.getElementById('searchInput1').value = globalSearch1;
-        document.getElementById('searchInput2').value = globalSearch2;
-        loadData();
-      } else if (tabId === "images") {
-        document.getElementById('searchInputImages1').value = globalSearch1;
-        document.getElementById('searchInputImages2').value = globalSearch2;
-        loadImagesData();
-      } else if (tabId === "today") {
-        loadTodayData();
-      } else if (tabId === "all") {
-        loadAllData();
-      } else if (tabId === "pending-calls") {
-        loadPendingCallsData();
-      }
-      hideLoading();
-    }
-    function hideLoading() {
-      document.getElementById("loading").style.display = "none";
-    }
-    function showQRCode() {
-      Swal.fire({
-        title: '📷 สแกน QR Code',
-        html: `
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://request-nawanakorn.vercel.app/" alt="QR Code" class="swal2-qrcode" style="width: 150px; height: 150px;">
-          <p>สแกนเพื่อเข้าสู่ระบบขอเบิกอะไหล่</p>
-        `,
-        confirmButtonText: 'ปิด',
-        customClass: {
-          popup: 'swal2-popup',
-          title: 'swal2-title',
-          confirmButton: 'swal2-confirm'
+      // Allow Enter key for login
+      passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleLogin();
         }
       });
-    }
-    // Unified function for showing detail modal (shared event for both tabs)
-    function showDetailModal(row, modalId, contentId) {
-      const fields = [
-        { key: 'Material', label: 'Material' },
-        { key: 'Description', label: 'Description' },
-        { key: 'วิภาวดี', label: 'วิภาวดี' },
-        { key: 'Unrestricted', label: 'นวนคร' },
-        { key: 'Rebuilt', label: 'Rebuilt' },
-        { key: 'หมายเหตุ', label: 'หมายเหตุ' },
-        { key: 'Product', label: 'Product' },
-        { key: 'OCRTAXT', label: 'Spec' }
-      ];
-      let html = '';
-      fields.forEach(field => {
-        let value = row[field.key] || '';
-        if (field.key === 'วิภาวดี' || field.key === 'Unrestricted') {
-          if (value && !isNaN(value)) {
-            value = Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
-          } else if (value === '0' || value === 0) {
-            value = '';
-          }
+      function showTab(tabId) {
+        const contents = document.querySelectorAll(".tab-content");
+        contents.forEach((tab) => tab.classList.remove("active"));
+        const targetTab = document.getElementById(tabId);
+        targetTab.classList.add("active");
+        // Update bottom nav active state
+        const navButtons = document.querySelectorAll(".nav-btn");
+        navButtons.forEach((btn) => btn.classList.remove("active"));
+        const clickedNav = document.querySelector(`[data-tab="${tabId}"]`);
+        if (clickedNav) clickedNav.classList.add("active");
+        document.getElementById("loading").style.display = "flex";
+        if (tabId === "parts") {
+          document.getElementById('searchInput1').value = globalSearch1;
+          document.getElementById('searchInput2').value = globalSearch2;
+          loadData();
+        } else if (tabId === "images") {
+          document.getElementById('searchInputImages1').value = globalSearch1;
+          document.getElementById('searchInputImages2').value = globalSearch2;
+          loadImagesData();
+        } else if (tabId === "today") {
+          loadTodayData();
+        } else if (tabId === "all") {
+          loadAllData();
+        } else if (tabId === "pending-calls") {
+          loadPendingCallsData();
         }
-        if ((field.key === 'หมายเหตุ' || field.key === 'Rebuilt') && value) {
-          value = `<span style="color: #d32f2f; font-weight: bold;">${value}</span>`;
-        }
-        if (field.key === 'Material') {
-          // Special handling for Material row: add flex layout and requisition button
-          html += `
-            <div class="material-row">
-              <span class="label">${field.label}:</span>
-              <div style="display: flex; align-items: center; flex-grow: 1;">
-                <span class="value">${value}</span>
-                <button class="requisition-button" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">เบิก</button>
-              </div>
-            </div>
-          `;
-        } else {
-          html += `<div><span class="label">${field.label}:</span> <span class="value">${value}</span></div>`;
-        }
-      });
-      // Gallery for images (shared logic)
-      let imageGalleryHtml = '<div class="image-gallery-parts">';
-      let imageIds = [];
-      if (row.id) {
-        if (typeof row.id === 'string' && row.id.includes(',')) {
-          imageIds = row.id.split(',').map(id => id.trim()).filter(id => id);
-        } else {
-          imageIds = [row.id];
-        }
-      } else if (row.UrlWeb) {
-        // Extract ID from Google Drive URL in parts tab
-        const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/);
-        if (match) {
-          imageIds = [match[1]];
-        }
+        hideLoading();
       }
-      if (imageIds.length > 0) {
-        imageIds.forEach(id => {
-          const thumbnailSrc = `https://drive.google.com/thumbnail?id=${id}&sz=w400-h400`;
-          imageGalleryHtml += `
-            <img src="${thumbnailSrc}"
-                 alt="Thumbnail"
-                 class="gallery-thumbnail-modal-parts"
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-                 style="display: block;">
-            <div style="text-align: center; font-size: 12px; color: #666; margin-top: 4px; display: none;">ไม่พบรูปภาพ</div>
-          `;
-        });
-      } else {
-        imageGalleryHtml += '<p style="text-align: center; color: #999; grid-column: 1 / -1;">ไม่พบข้อมูลรูปภาพ</p>';
+      function hideLoading() {
+        document.getElementById("loading").style.display = "none";
       }
-      imageGalleryHtml += '</div>';
-      html = imageGalleryHtml + html; // Gallery first, then fields
-      const modal = document.getElementById(modalId);
-      const content = document.getElementById(contentId);
-      content.innerHTML = html;
-      modal.style.display = 'block';
-    }
-    // Event listener for lightbox close on ESC key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.getElementById('lightbox').style.display === 'flex') {
-        closeLightbox();
-      }
-    });
-    // Parts tab functions (now after variables)
-    itemsPerPageSelect.addEventListener("change", () => {
-      itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
-      currentPage = 1;
-      renderTableData();
-      renderPagination(allData.length);
-    });
-    retryButton.addEventListener("click", () => {
-      errorContainer.style.display = "none";
-      loadData();
-    });
-    function renderTable(data) {
-      if (!tableBody) {
-        console.error("Table body for #data-table not found");
+      function showQRCode() {
         Swal.fire({
-          icon: "error",
-          title: "ข้อผิดพลาด",
-          text: "ไม่พบตารางข้อมูล กรุณาตรวจสอบโครงสร้างหน้าเว็บ",
-          confirmButtonText: "ตกลง",
+          title: '📷 สแกน QR Code',
+          html: `
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://request-nawanakorn.vercel.app/" alt="QR Code" class="swal2-qrcode" style="width: 150px; height: 150px;">
+            <p>สแกนเพื่อเข้าสู่ระบบขอเบิกอะไหล่</p>
+          `,
+          confirmButtonText: 'ปิด',
+          customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            confirmButton: 'swal2-confirm'
+          }
         });
-        return;
       }
-      tableBody.innerHTML = "";
-      data.forEach((row) => {
-        const tr = document.createElement("tr");
-        const requisitionTd = document.createElement("td");
-        const btn = document.createElement("button");
-        btn.textContent = "เบิก";
-        btn.className = "requisition-button";
-        btn.onclick = () => showRequisitionDialog(row);
-        requisitionTd.appendChild(btn);
-        tr.appendChild(requisitionTd);
-        const columns = [
-          "UrlWeb",
-          "Material",
-          "Description",
-          "วิภาวดี",
-          "Unrestricted",
-          "Rebuilt",
-          "หมายเหตุ",
-          "Product",
-          "OCRTAXT"
+      // Unified function for showing detail modal (shared event for both tabs)
+      function showDetailModal(row, modalId, contentId) {
+        const fields = [
+          { key: 'Material', label: 'Material' },
+          { key: 'Description', label: 'Description' },
+          { key: 'วิภาวดี', label: 'วิภาวดี' },
+          { key: 'Unrestricted', label: 'นวนคร' },
+          { key: 'Rebuilt', label: 'Rebuilt' },
+          { key: 'หมายเหตุ', label: 'หมายเหตุ' },
+          { key: 'Product', label: 'Product' },
+          { key: 'OCRTAXT', label: 'Spec' }
         ];
-        // Convert values to numbers for comparison
-        const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
-        const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
-        // Determine styling based on conditions
-        let textColor = "";
-        let fontWeight = "";
-        if (vibhavadiValue > 0) {
-          textColor = "#4caf50"; // Green
-          fontWeight = "bold";
-        } else if (vibhavadiValue === 0 && unrestrictedValue > 0) {
-          textColor = "#2196f3"; // Blue
-          fontWeight = "bold";
-        }
-        columns.forEach((col) => {
-          const td = document.createElement("td");
-          let value = row[col] || "";
-          if (col === "วิภาวดี" || col === "Unrestricted") {
+        let html = '';
+        fields.forEach(field => {
+          let value = row[field.key] || '';
+          if (field.key === 'วิภาวดี' || field.key === 'Unrestricted') {
             if (value && !isNaN(value)) {
-              value = Number(value).toLocaleString("en-US", {
-                maximumFractionDigits: 0,
-              });
-            } else if (value === "0" || value === 0) {
-              value = "";
+              value = Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
+            } else if (value === '0' || value === 0) {
+              value = '';
             }
           }
-          if ((col === "หมายเหตุ" || col === "Rebuilt") && value) {
-            td.style.color = "#d32f2f";
-            td.style.fontWeight = "bold";
+          if ((field.key === 'หมายเหตุ' || field.key === 'Rebuilt') && value) {
+            value = `<span style="color: #d32f2f; font-weight: bold;">${value}</span>`;
           }
-          // Apply conditional styling to Material, Description, วิภาวดี, and Unrestricted
-          if (
-            col === "Material" ||
-            col === "Description" ||
-            col === "วิภาวดี" ||
-            col === "Unrestricted"
-          ) {
-            if (textColor) td.style.color = textColor;
-            if (fontWeight) td.style.fontWeight = fontWeight;
-          }
-          if (col === "UrlWeb" && value) {
-            // Changed to button that opens modal instead of external link
-            const imageBtn = document.createElement("button");
-            imageBtn.innerHTML = '<i class="fas fa-image"></i>';
-            imageBtn.className = "image-button";
-            imageBtn.onclick = () => showDetailModal(row, 'imageModal', 'imageModalContent'); // Use unified function
-            td.appendChild(imageBtn);
+          if (field.key === 'Material') {
+            // Special handling for Material row: add flex layout and requisition button
+            html += `
+              <div class="material-row">
+                <span class="label">${field.label}:</span>
+                <div style="display: flex; align-items: center; flex-grow: 1;">
+                  <span class="value">${value}</span>
+                  <button class="requisition-button" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">เบิก</button>
+                </div>
+              </div>
+            `;
           } else {
-            td.textContent = value;
+            html += `<div><span class="label">${field.label}:</span> <span class="value">${value}</span></div>`;
           }
-          tr.appendChild(td);
         });
-        tableBody.appendChild(tr);
+        // Gallery for images (shared logic)
+        let imageGalleryHtml = '<div class="image-gallery-parts">';
+        let imageIds = [];
+        if (row.id) {
+          if (typeof row.id === 'string' && row.id.includes(',')) {
+            imageIds = row.id.split(',').map(id => id.trim()).filter(id => id);
+          } else {
+            imageIds = [row.id];
+          }
+        } else if (row.UrlWeb) {
+          // Extract ID from Google Drive URL in parts tab
+          const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/);
+          if (match) {
+            imageIds = [match[1]];
+          }
+        }
+        if (imageIds.length > 0) {
+          imageIds.forEach(id => {
+            const thumbnailSrc = `https://drive.google.com/thumbnail?id=${id}&sz=w400-h400`;
+            imageGalleryHtml += `
+              <img src="${thumbnailSrc}"
+                   alt="Thumbnail"
+                   class="gallery-thumbnail-modal-parts"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                   style="display: block;">
+              <div style="text-align: center; font-size: 12px; color: #666; margin-top: 4px; display: none;">ไม่พบรูปภาพ</div>
+            `;
+          });
+        } else {
+          imageGalleryHtml += '<p style="text-align: center; color: #999; grid-column: 1 / -1;">ไม่พบข้อมูลรูปภาพ</p>';
+        }
+        imageGalleryHtml += '</div>';
+        html = imageGalleryHtml + html; // Gallery first, then fields
+        const modal = document.getElementById(modalId);
+        const content = document.getElementById(contentId);
+        content.innerHTML = html;
+        modal.style.display = 'block';
+      }
+      // Event listener for lightbox close on ESC key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('lightbox').style.display === 'flex') {
+          closeLightbox();
+        }
       });
-    }
+      // Parts tab functions (now after variables)
+      itemsPerPageSelect.addEventListener("change", () => {
+        itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
+        currentPage = 1;
+        renderTableData();
+        renderPagination(allData.length);
+      });
+      retryButton.addEventListener("click", () => {
+        errorContainer.style.display = "none";
+        loadData();
+      });
+     function renderTable(data) {
+        if (!tableBody) {
+          console.error("Table body for #data-table not found");
+          Swal.fire({
+            icon: "error",
+            title: "ข้อผิดพลาด",
+            text: "ไม่พบตารางข้อมูล กรุณาตรวจสอบโครงสร้างหน้าเว็บ",
+            confirmButtonText: "ตกลง",
+          });
+          return;
+        }
+        tableBody.innerHTML = "";
+        data.forEach((row) => {
+          const tr = document.createElement("tr");
+          const requisitionTd = document.createElement("td");
+          const btn = document.createElement("button");
+          btn.textContent = "เบิก";
+          btn.className = "requisition-button";
+          btn.onclick = () => showRequisitionDialog(row);
+          requisitionTd.appendChild(btn);
+          tr.appendChild(requisitionTd);
+          const columns = [
+            "UrlWeb",
+            "Material",
+            "Description",
+            "วิภาวดี",
+            "Unrestricted",
+            "Rebuilt",
+            "หมายเหตุ",
+            "Product",
+            "OCRTAXT"
+          ];
+          // Convert values to numbers for comparison
+          const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
+          const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
+          // Determine styling based on conditions
+          let textColor = "";
+          let fontWeight = "";
+          if (vibhavadiValue > 0) {
+            textColor = "#4caf50"; // Green
+            fontWeight = "bold";
+          } else if (vibhavadiValue === 0 && unrestrictedValue > 0) {
+            textColor = "#2196f3"; // Blue
+            fontWeight = "bold";
+          }
+          columns.forEach((col) => {
+            const td = document.createElement("td");
+            let value = row[col] || "";
+            if (col === "วิภาวดี" || col === "Unrestricted") {
+              if (value && !isNaN(value)) {
+                value = Number(value).toLocaleString("en-US", {
+                  maximumFractionDigits: 0,
+                });
+              } else if (value === "0" || value === 0) {
+                value = "";
+              }
+            }
+            if ((col === "หมายเหตุ" || col === "Rebuilt") && value) {
+              td.style.color = "#d32f2f";
+              td.style.fontWeight = "bold";
+            }
+            // Apply conditional styling to Material, Description, วิภาวดี, and Unrestricted
+            if (
+              col === "Material" ||
+              col === "Description" ||
+              col === "วิภาวดี" ||
+              col === "Unrestricted"
+            ) {
+              if (textColor) td.style.color = textColor;
+              if (fontWeight) td.style.fontWeight = fontWeight;
+            }
+            if (col === "UrlWeb" && value) {
+              // Changed to button that opens modal instead of external link
+              const imageBtn = document.createElement("button");
+              imageBtn.innerHTML = '<i class="fas fa-image"></i>';
+              imageBtn.className = "image-button";
+              imageBtn.onclick = () => showDetailModal(row, 'imageModal', 'imageModalContent'); // Use unified function
+              td.appendChild(imageBtn);
+            } else {
+              td.textContent = value;
+            }
+            tr.appendChild(td);
+          });
+          tableBody.appendChild(tr);
+        });
+      }
       async function showRequisitionDialog(row) {
   document.body.style.overflow = 'hidden';
   const history = {
@@ -5611,18 +5285,6 @@ function formatTimestamp(dateTimeStr) {
   const formattedTime = timePart || '';
   return `${formattedDate} ${formattedTime}`;
 }
-      // PWA Service Worker Registration
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(registration => {
-              console.log('SW registered: ', registration);
-            })
-            .catch(registrationError => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
     </script>
   </body>
 </html>
