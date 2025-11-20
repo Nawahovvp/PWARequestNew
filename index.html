@@ -74,37 +74,41 @@
   }
       body.dark-mode .login-modal {
         background-color: rgba(0, 0, 0, 0.8);
+        color: var(--text-primary);
       }
       body.dark-mode .login-content {
         background: linear-gradient(135deg, #2c3e50, #34495e);
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       body.dark-mode .login-content input {
         background-color: #34495e;
         border-color: #555;
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       body.dark-mode .login-content input:focus {
         border-color: #1abc9c;
         box-shadow: 0 0 5px rgba(26, 188, 156, 0.3);
+        color: var(--text-primary);
       }
       body.dark-mode .login-content button {
         background: linear-gradient(135deg, #1abc9c, #16a085);
+        color: var(--text-primary);
       }
       body.dark-mode .login-content button:hover {
         background: linear-gradient(135deg, #16a085, #1abc9c);
+        color: var(--text-primary);
       }
       body.dark-mode .error {
         background: #7f1d1d;
-        color: #fca5a5;
+        color: var(--text-primary);
       }
       body.dark-mode .header {
         background: linear-gradient(135deg, #2c3e50, #34495e);
-        color: #ecf0f1;
+        color: var(--text-primary);
         border-bottom-color: #1abc9c;
       }
       body.dark-mode .header h1 {
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       body.dark-mode .qrcode-header-btn {
         background: linear-gradient(135deg, #1abc9c, #16a085);
@@ -138,12 +142,12 @@
       }
       body.dark-mode .container {
         background-color: #2c3e50;
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       body.dark-mode .disclaimer {
         background-color: #7f8c8d;
         border-color: #95a5a6;
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       body.dark-mode .tab-button {
         background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
@@ -165,11 +169,11 @@
       }
       body.dark-mode th {
         background: linear-gradient(135deg, #1abc9c, #16a085);
-        color: #ecf0f1;
+        ccolor: var(--text-primary);
       }
       body.dark-mode td {
         border-color: #555;
-        color: #e0e0e0;
+        color: var(--text-primary);
       }
       body.dark-mode tr:hover {
         background-color: #3d566e;
@@ -194,10 +198,10 @@
       }
       body.dark-mode .modal-content {
         background: linear-gradient(to bottom right, #2c3e50, #34495e);
-        color: #ecf0f1;
+       color: var(--text-primary);
       }
       body.dark-mode #modalContent span.label {
-        color: #1abc9c;
+        color: var(--text-primary);
       }
       body.dark-mode .footer {
         background: linear-gradient(135deg, #1abc9c, #16a085);
@@ -414,7 +418,7 @@
       body.dark-mode .header {
         background: linear-gradient(135deg, #2c3e50, #34495e);
         border-bottom-color: #1abc9c;
-        color: #ecf0f1;
+       color: var(--text-primary);
       }
       .header-title {
         display: flex;
@@ -429,7 +433,7 @@
         transition: color 0.3s ease;
       }
       body.dark-mode .header-title {
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       /* Header Setting Button */
       .header-setting-btn {
@@ -500,10 +504,10 @@
         color: #2196f3;
       }
       body.dark-mode .nav-btn {
-        color: #bdc3c7;
+        color: var(--text-primary);
       }
       body.dark-mode .nav-btn.active {
-        color: #1abc9c;
+        color: var(--text-primary);
       }
       .nav-btn:hover {
         transform: scale(1.05); /* ลด scale */
@@ -538,7 +542,7 @@
       }
       body.dark-mode .settings-modal-content {
         background: linear-gradient(135deg, #2c3e50, #34495e);
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       .close-settings {
         color: #78909c;
@@ -549,10 +553,10 @@
         transition: color 0.3s ease;
       }
       body.dark-mode .close-settings {
-        color: #bdc3c7;
+        color: var(--text-primary);
       }
       .close-settings:hover {
-        color: #e53935;
+        color: var(--text-primary);
       }
       .settings-modal-content h2 {
         color: #1a3c87;
@@ -561,15 +565,14 @@
         font-size: 18px; /* ลด font-size */
       }
       body.dark-mode .settings-modal-content h2 {
-        color: #ecf0f1;
-      }
+        color: var(--text-primary);
       #userInfo p {
         margin: 8px 0; /* ลด margin */
         font-size: 12px; /* ลด font-size */
-        color: #333;
+        color: var(--text-primary);
       }
       body.dark-mode #userInfo p {
-        color: #e0e0e0;
+        color: var(--text-primary);
       }
       .modal-qr-btn, .modal-logout-btn {
         width: 100%;
@@ -659,7 +662,7 @@
       }
       body.dark-mode .loading {
         background: rgba(0, 0, 0, 0.8);
-        color: #1abc9c;
+        color: var(--text-primary);
       }
       .loading .spinner {
         width: 32px; /* ลด size */
@@ -732,7 +735,7 @@
       body.dark-mode #parts #searchInput1, body.dark-mode #parts #searchInput2, body.dark-mode #images #searchInputImages1, body.dark-mode #images #searchInputImages2, body.dark-mode #today #searchInputToday {
         background-color: #34495e;
         border-color: #555;
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       body.dark-mode #parts #searchInput1:focus, body.dark-mode #parts #searchInput2:focus, body.dark-mode #images #searchInputImages1:focus, body.dark-mode #images #searchInputImages2:focus, body.dark-mode #today #searchInputToday:focus {
         border-color: #1abc9c;
@@ -1303,7 +1306,7 @@
         transition: color 0.3s ease;
       }
       body.dark-mode .swal2-spinner-container {
-        color: #1abc9c;
+        color: var(--text-primary);
       }
       .swal2-spinner {
         width: 32px; /* ลด size */
@@ -1488,13 +1491,13 @@
         transition: color 0.3s;
       }
       body.dark-mode #all .all-close {
-        color: #bdc3c7;
+        color: var(--text-primary);
       }
       #all .all-close:hover {
         color: #000;
       }
       body.dark-mode #all .all-close:hover {
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       #all #modalContentAll span.label {
         color: #007bff;
@@ -1502,14 +1505,14 @@
         transition: color 0.3s ease;
       }
       body.dark-mode #all #modalContentAll span.label {
-        color: #1abc9c;
+        color: var(--text-primary);
       }
       #all #modalContentAll span.value {
         color: #000;
         transition: color 0.3s ease;
       }
       body.dark-mode #all #modalContentAll span.value {
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       #all .all-pagination {
         display: flex;
@@ -1544,7 +1547,7 @@
       }
       body.dark-mode #all .all-pagination .all-page-number {
         background-color: #34495e;
-        color: #1abc9c;
+        color: var(--text-primary);
       }
       #all .all-pagination .all-page-number.active {
        background: linear-gradient(135deg, #ff9800, #f57c00) !important; /* เปลี่ยนเป็นส้ม */
@@ -1706,11 +1709,11 @@
       }
       #pending-calls #teamFilterLabelPending {
         font-size: 14px; /* ลด font-size */
-        color: #333;
+        color: var(--text-primary);
         transition: color 0.3s ease;
       }
       body.dark-mode #pending-calls #teamFilterLabelPending {
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       #pending-calls #teamFilterPending {
         margin-left: 4px; /* ลด margin */
@@ -1787,7 +1790,7 @@
       }
       body.dark-mode #pending-calls th, body.dark-mode #pending-calls td {
         border-color: #555;
-        color: #e0e0e0;
+        color: var(--text-primary);
       }
       #pending-calls th {
         background-color: #007bff;
@@ -1795,7 +1798,7 @@
       }
       body.dark-mode #pending-calls th {
         background: linear-gradient(135deg, #1abc9c, #16a085);
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       #pending-calls th.sortable {
         cursor: pointer;
@@ -1857,7 +1860,7 @@
       }
       body.dark-mode #pending-calls .pending-modal-content {
         background-color: #2c3e50;
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       #pending-calls .pending-close {
         color: #aaa;
@@ -1868,13 +1871,13 @@
         transition: color 0.3s;
       }
       body.dark-mode #pending-calls .pending-close {
-        color: #bdc3c7;
+        color: var(--text-primary);
       }
       #pending-calls .pending-close:hover {
         color: #000;
       }
       body.dark-mode #pending-calls .pending-close:hover {
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       #pending-calls #modalContentPending span.label {
         color: #007bff;
@@ -1882,14 +1885,14 @@
         transition: color 0.3s ease;
       }
       body.dark-mode #pending-calls #modalContentPending span.label {
-        color: #1abc9c;
+        color: var(--text-primary);
       }
       #pending-calls #modalContentPending span.value {
         color: #000;
         transition: color 0.3s ease;
       }
       body.dark-mode #pending-calls #modalContentPending span.value {
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       #pending-calls .pending-pagination {
         display: flex;
@@ -2032,7 +2035,7 @@
       }
       body.dark-mode #pending-calls .pending-call-count-box {
         background-color: #1e3a5f;
-        color: #1abc9c;
+        color: var(--text-primary);
         border-color: #2c5282;
       }
       #pending-calls .pending-call-count-box span {
@@ -2042,7 +2045,7 @@
         transition: color 0.3s ease;
       }
       body.dark-mode #pending-calls .pending-call-count-box span {
-        color: #ff6b9d;
+        color: var(--text-primary);
       }
       #pending-calls .pending-modern-label {
         display: inline-block;
@@ -2059,7 +2062,7 @@
       }
       body.dark-mode #pending-calls .pending-modern-label {
         background-color: #34495e;
-        color: #1abc9c;
+        color: var(--text-primary);
         border-color: #4a6582;
       }
       #pending-calls .pending-modern-label:hover {
@@ -2068,7 +2071,7 @@
       }
       body.dark-mode #pending-calls .pending-modern-label:hover {
         background-color: #3d566e;
-        color: #16a085;
+        color: var(--text-primary);
       }
       /* Disclaimer banner for legitimacy */
       .disclaimer {
@@ -2085,7 +2088,7 @@
       body.dark-mode .disclaimer {
         background-color: #7f8c8d;
         border-color: #95a5a6;
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       /* Responsive adjustments for mobile devices - Enhanced for Compact */
      @media screen and (max-width: 768px) {
@@ -2362,7 +2365,7 @@
       }
       body.dark-mode #images .gallery-item {
         background: #34495e;
-        color: #ecf0f1;
+        color: var(--text-primary);
       }
       #images .gallery-item:hover {
         transform: translateY(-5px);
@@ -2391,7 +2394,7 @@
         font-size: 10px; /* ลด font-size */
       }
       body.dark-mode #images .gallery-material {
-        color: #1abc9c;
+        color: var(--text-primary);
       }
       #images .gallery-description {
         color: #666;
@@ -2403,7 +2406,7 @@
         -webkit-box-orient: vertical;
       }
       body.dark-mode #images .gallery-description {
-        color: #bdc3c7;
+        color: var(--text-primary);
       }
       #images .gallery-actions {
         margin-top: 6px; /* ลด margin */
