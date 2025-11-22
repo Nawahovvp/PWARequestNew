@@ -3177,6 +3177,13 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     if (document.querySelector('.nav-btn.active')) {
       showTab('parts');
     }
+    // PWA: ซ่อน install button ถ้าติดตั้งแล้ว (เพิ่ม logic นี้ใน if เพื่อใช้ isLoggedIn ที่ define แล้ว)
+    if (localStorage.getItem('partgo-installed')) {
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) {
+        installBtn.style.display = 'none';
+      }
+    }
   } else {
     loginModal.classList.add('active');
     appContent.classList.remove('logged-in');
