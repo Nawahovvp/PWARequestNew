@@ -3166,7 +3166,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
           console.error('Login error:', error);
         }
       }
-      function checkLoginStatus() {
+     function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
   if (isLoggedIn && savedUsername) {
@@ -3176,6 +3176,11 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     // Auto-load default tab if needed
     if (document.querySelector('.nav-btn.active')) {
       showTab('parts');
+    }
+    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค) – เช็คเฉพาะ hide เท่านั้น
+    if (localStorage.getItem('partgo-installed')) {
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) installBtn.style.display = 'none';
     }
   } else {
     loginModal.classList.add('active');
@@ -3193,18 +3198,51 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     if (savedUsername) usernameInput.value = savedUsername;
     rememberMeCheckbox.checked = true;
   }
- if (isLoggedIn) {
-    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค)
-    if (localStorage.getItem('partgo-installed')) {
-      const installBtn = document.getElementById('install-btn');
-      if (installBtn) installBtn.style.display = 'none';
-    } else {
-      // ถ้ายังไม่ติดตั้ง แสดงปุ่ม (ถ้ามี deferredPrompt)
-      const installBtn = document.getElementById('install-btn');
-      if (installBtn && deferredPrompt) installBtn.style.display = 'flex';
+}
+
+// PWA Install Prompt Logic (ปรับให้แสดงปุ่มใน event เท่านั้น – เพื่อหลีกเลี่ยง undefined)
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // แสดงปุ่มที่นี่ (หลัง event fire) – เช็คว่าติดตั้งแล้วหรือยัง
+  if (!localStorage.getItem('partgo-installed')) {  // เพิ่มเช็คนี้
+    const installBtn = document.getElementById('install-btn');
+    if (installBtn) {
+      installBtn.style.display = 'flex';
+      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartGo';
     }
   }
-}
+  console.log('PWA ready for install');  // Debug log
+});
+
+// คลิกปุ่ม install (เดิม แต่เพิ่ม set localStorage)
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      localStorage.setItem('partgo-installed', 'true');  // Set persist
+      document.getElementById('install-btn').style.display = 'none';
+      Swal.fire({
+        icon: 'success',
+        title: 'ติดตั้งสำเร็จ!',
+        text: 'PartGotest พร้อมใช้งานบนหน้าจอหลักแล้ว',  // ตรงชื่อแอพ
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+    deferredPrompt = null;
+  }
+});
+
+// appinstalled event (fallback set localStorage)
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('partgo-installed', 'true');
+  const installBtn = document.getElementById('install-btn');
+  if (installBtn) installBtn.style.display = 'none';
+  console.log('PartGotest ติดตั้งแล้ว!');
+});
       function handleLogout() {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('username');
