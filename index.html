@@ -478,39 +478,6 @@
       .nav-btn i {
         font-size: 16px; /* ลด icon size */
       }
-      /* Install Button Styles - Compact & Themed */
-#install-btn {
-  display: none; /* ซ่อนเริ่มต้น */
-  position: fixed;
-  top: 10px; /* วางมุมขวาบน header */
-  right: 10px;
-  z-index: 1001;
-  padding: 8px 16px; /* Compact */
-  background: linear-gradient(135deg, #42a5f5, #2196f3); /* สีน้ำเงิน Facebook */
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-size: 12px; /* เล็กเพื่อไม่กินพื้นที่ */
-  font-family: "Kanit", sans-serif;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-#install-btn:hover {
-  background: linear-gradient(135deg, #1976d2, #1565c0);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
-}
-#install-btn i { font-size: 14px; }
-body.dark-mode #install-btn {
-  background: linear-gradient(135deg, #1abc9c, #16a085); /* เขียวสำหรับ dark mode */
-}
-body.dark-mode #install-btn:hover {
-  background: linear-gradient(135deg, #16a085, #1abc9c);
-}
       /* Settings Modal Styles */
       .settings-modal {
         display: none;
@@ -2587,9 +2554,6 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
         <div class="header-title">
           <span> ระบบขอสั่งอะไหล่จากคลังสินค้านวนคร</span>
         </div>
-        <button id="install-btn" title="ติดตั้ง PartGo บนหน้าจอหลัก">
-    <i class="fas fa-download"></i> ติดตั้ง
-  </button>
         <span id="userNameSmall" class="user-name-small"></span>
         <button class="header-setting-btn" onclick="showSettings()" title="ตั้งค่า"><i class="fas fa-bars"></i></button>
       </div>
@@ -3176,13 +3140,6 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     // Auto-load default tab if needed
     if (document.querySelector('.nav-btn.active')) {
       showTab('parts');
-    }
-    // PWA: ซ่อน install button ถ้าติดตั้งแล้ว (เพิ่ม logic นี้ใน if เพื่อใช้ isLoggedIn ที่ define แล้ว)
-    if (localStorage.getItem('partgo-installed')) {
-      const installBtn = document.getElementById('install-btn');
-      if (installBtn) {
-        installBtn.style.display = 'none';
-      }
     }
   } else {
     loginModal.classList.add('active');
@@ -5347,67 +5304,6 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-// PWA Install Prompt Logic - แสดงทันทีหลัง load (ถ้า PWA พร้อม)
-let deferredPrompt; // เก็บ event prompt
-
-// ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); // ป้องกัน prompt อัตโนมัติ
-  deferredPrompt = e; // เก็บไว้ใช้
-
-  // แสดงปุ่มหลัง delay เล็กน้อย (2 วินาที เพื่อให้ผู้ใช้เห็นเนื้อหา)
-  setTimeout(() => {
-    const installBtn = document.getElementById('install-btn');
-    if (installBtn) {
-      installBtn.style.display = 'flex';
-      installBtn.textContent = '📱 ติดตั้ง PartGo'; // อัปเดตข้อความ
-      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartGo';
-    }
-  }, 2000); // Delay 2s สำหรับ UX (ปรับได้)
-});
-
-// จัดการคลิกปุ่ม install
-document.getElementById('install-btn').addEventListener('click', async () => {
-  if (deferredPrompt) {
-    // แสดง native prompt
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('ผู้ใช้เลือก:', outcome); // 'accepted' หรือ 'dismissed'
-
-    if (outcome === 'accepted') {
-      // ซ่อนปุ่มหลังติดตั้ง
-      document.getElementById('install-btn').style.display = 'none';
-      // แสดง toast (ใช้ SweetAlert ถ้ามี)
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          icon: 'success',
-          title: 'ติดตั้งสำเร็จ!',
-          text: 'PartGo พร้อมใช้งานบนหน้าจอหลักแล้ว',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      }
-    }
-    deferredPrompt = null;
-  }
-});
-
-window.addEventListener('appinstalled', () => {
-  console.log('PartGo ติดตั้งแล้ว!');
-  document.getElementById('install-btn').style.display = 'none';
-  deferredPrompt = null;
-  localStorage.setItem('partgo-installed', 'true'); // Track ว่าติดตั้งแล้ว
-});
-// ถ้าต้องการซ่อนปุ่มหลัง login (optional - เพิ่มใน checkLoginStatus())
-function checkLoginStatus() {
-  // โค้ดเดิม...
-  if (isLoggedIn) { // สมมติตัวแปร isLoggedIn
-    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค)
-    if (localStorage.getItem('partgo-installed')) {
-      document.getElementById('install-btn').style.display = 'none';
-    }
-  }
-}     
     </script>
   </body>
 </html>
