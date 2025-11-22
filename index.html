@@ -3193,6 +3193,12 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     if (savedUsername) usernameInput.value = savedUsername;
     rememberMeCheckbox.checked = true;
   }
+  if (isLoggedIn) { // สมมติตัวแปร isLoggedIn
+    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค)
+    if (localStorage.getItem('partgo-installed')) {
+      document.getElementById('install-btn').style.display = 'none';
+    }
+  }      
 }
       function handleLogout() {
         localStorage.removeItem('isLoggedIn');
@@ -5340,6 +5346,57 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+      // PWA Install Prompt Logic - แสดงทันทีหลัง load (ถ้า PWA พร้อม)
+let deferredPrompt; // เก็บ event prompt
+
+// ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault(); // ป้องกัน prompt อัตโนมัติ
+  deferredPrompt = e; // เก็บไว้ใช้
+
+  // แสดงปุ่มหลัง delay เล็กน้อย (2 วินาที เพื่อให้ผู้ใช้เห็นเนื้อหา)
+  setTimeout(() => {
+    const installBtn = document.getElementById('install-btn');
+    if (installBtn) {
+      installBtn.style.display = 'flex';
+      installBtn.textContent = '📱 ติดตั้ง PartGo'; // อัปเดตข้อความ
+      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartGo';
+    }
+  }, 2000); // Delay 2s สำหรับ UX (ปรับได้)
+});
+
+// จัดการคลิกปุ่ม install
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    // แสดง native prompt
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('ผู้ใช้เลือก:', outcome); // 'accepted' หรือ 'dismissed'
+
+    if (outcome === 'accepted') {
+      // ซ่อนปุ่มหลังติดตั้ง
+      document.getElementById('install-btn').style.display = 'none';
+      // แสดง toast (ใช้ SweetAlert ถ้ามี)
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'success',
+          title: 'ติดตั้งสำเร็จ!',
+          text: 'PartGo พร้อมใช้งานบนหน้าจอหลักแล้ว',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+    deferredPrompt = null;
+  }
+});
+
+// ตรวจสอบถ้าติดตั้งแล้ว (ไม่แสดง prompt ซ้ำ)
+window.addEventListener('appinstalled', () => {
+  console.log('PartGo ติดตั้งแล้ว!');
+  document.getElementById('install-btn').style.display = 'none';
+  deferredPrompt = null;
+});
     </script>
   </body>
 </html>
