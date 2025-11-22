@@ -9,6 +9,14 @@
   <meta name="mobile-web-app-capable" content="yes"> <!-- Fixed: Deprecated tag replaced -->
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="ระบบขอสั่งอะไหล่คลังสินค้านวนคร">
+  <!-- iOS-Specific Meta Tags (เพิ่มเติม) -->
+<meta name="apple-mobile-web-app-title" content="PartsGo">  <!-- ชื่อ app ใน home screen -->
+<meta name="apple-mobile-web-app-status-bar-style" content="default">  <!-- Status bar สี default -->
+<meta name="apple-mobile-web-app-capable" content="yes">  <!-- Fullscreen mode -->
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">  <!-- iOS icon 180x180 -->
+<link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png">  <!-- iPad -->
+<meta name="format-detection" content="telephone=no">  <!-- ปิด auto-link เบอร์โทร -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0, minimum-scale=1.0, viewport-fit=cover">  <!-- viewport-fit สำหรับ iPhone X+ notch -->  
   <link rel="apple-touch-icon" href="/icon-192.png">
   <!-- Enhanced Content Security Policy to reduce phishing risks -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob: https://drive.google.com https://lh3.googleusercontent.com; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
@@ -5398,6 +5406,40 @@ window.addEventListener('appinstalled', () => {
   if (installBtn) installBtn.style.display = 'none';
   deferredPrompt = null;
 });
+// iOS Detection & Manual Install Guide (เพิ่มใหม่)
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+function showIOSInstallPrompt() {
+  if (!isIOS() || localStorage.getItem('ios-installed')) return;  // ถ้าติดตั้งแล้ว ซ่อน
+
+  // แสดง banner คำแนะนำ (ใช้ Swal หรือ custom div)
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: '📱 ติดตั้ง PartGo บน iOS',
+      html: `
+        <p>กดปุ่ม <strong>Share</strong> (สี่เหลี่ยมมีลูกศร) ด้านล่าง แล้วเลือก <strong>Add to Home Screen</strong></p>
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TaGFyZSAmIEFkZCB0byBIb21lPC90ZXh0Pjwvc3ZnPg==" alt="iOS Share Guide" style="width: 100%; margin-top: 10px;">
+        <p>PartGo จะเพิ่มเป็น app บนหน้าจอหลัก!</p>
+      `,
+      icon: 'info',
+      confirmButtonText: 'เข้าใจแล้ว',
+      showCancelButton: false,
+      timer: 10000  // Auto-close หลัง 10s
+    }).then(() => {
+      localStorage.setItem('ios-installed', 'true');  // Mark as shown
+    });
+  }
+}
+
+// เรียกเมื่อ load เสร็จ (หลัง checkLoginStatus)
+window.addEventListener('load', () => {
+  if (isIOS()) {
+    setTimeout(showIOSInstallPrompt, 3000);  // แสดงหลัง 3s
+  }
+  // Existing SW registration...
+});      
     </script>
   </body>
 </html>
