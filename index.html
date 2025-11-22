@@ -5392,13 +5392,12 @@ document.getElementById('install-btn').addEventListener('click', async () => {
   }
 });
 
-// ตรวจสอบถ้าติดตั้งแล้ว (ไม่แสดง prompt ซ้ำ)
 window.addEventListener('appinstalled', () => {
   console.log('PartGo ติดตั้งแล้ว!');
   document.getElementById('install-btn').style.display = 'none';
   deferredPrompt = null;
+  localStorage.setItem('partgo-installed', 'true'); // Track ว่าติดตั้งแล้ว
 });
-
 // ถ้าต้องการซ่อนปุ่มหลัง login (optional - เพิ่มใน checkLoginStatus())
 function checkLoginStatus() {
   // โค้ดเดิม...
