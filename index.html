@@ -423,6 +423,39 @@
       body.dark-mode .header-setting-btn:hover {
         background: linear-gradient(135deg, #e67e22, #d68910);
       }
+      /* Install Button Styles - Compact & Themed */
+#install-btn {
+  display: none; /* ซ่อนเริ่มต้น */
+  position: fixed;
+  top: 10px; /* วางมุมขวาบน header */
+  right: 10px;
+  z-index: 1001;
+  padding: 8px 16px; /* Compact */
+  background: linear-gradient(135deg, #42a5f5, #2196f3); /* สีน้ำเงิน Facebook */
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px; /* เล็กเพื่อไม่กินพื้นที่ */
+  font-family: "Kanit", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+#install-btn:hover {
+  background: linear-gradient(135deg, #1976d2, #1565c0);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+#install-btn i { font-size: 14px; }
+body.dark-mode #install-btn {
+  background: linear-gradient(135deg, #1abc9c, #16a085); /* เขียวสำหรับ dark mode */
+}
+body.dark-mode #install-btn:hover {
+  background: linear-gradient(135deg, #16a085, #1abc9c);
+}
       /* Bottom Navigation Styles (Facebook Mobile-like) - More Compact */
       .bottom-nav {
         position: fixed;
@@ -2554,6 +2587,9 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
         <div class="header-title">
           <span> ระบบขอสั่งอะไหล่จากคลังสินค้านวนคร</span>
         </div>
+        <button id="install-btn" title="ติดตั้ง PartGo บนหน้าจอหลัก">
+    <i class="fas fa-download"></i> ติดตั้ง
+  </button>
         <span id="userNameSmall" class="user-name-small"></span>
         <button class="header-setting-btn" onclick="showSettings()" title="ตั้งค่า"><i class="fas fa-bars"></i></button>
       </div>
