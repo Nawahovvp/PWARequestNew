@@ -4061,6 +4061,7 @@ body.dark-mode .canva-button[aria-selected="true"] {
         }
         // ถ้ากด "ยืนยันเบิกต่อ" → ดำเนินการต่อไปตามปกติ
       }
+      
       // Popup สรุปข้อมูล
             // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
       // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
@@ -4182,6 +4183,13 @@ body.dark-mode .canva-button[aria-selected="true"] {
         }
       });
       if (summaryResult.isConfirmed) {
+        // ปิด modal รายละเอียดทุกรูปแบบที่อาจเปิดค้างอยู่
+        const detailModal = document.getElementById('imageModal');
+        if (detailModal) detailModal.style.display = 'none';
+
+        const imageModalImages = document.getElementById('imageModalImages');
+        if (imageModalImages) imageModalImages.style.display = 'none';
+        // สร้าง JSON payload
         const jsonPayload = {
           material: row.Material || '',
           description: row.Description || '',
