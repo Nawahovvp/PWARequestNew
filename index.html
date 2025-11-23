@@ -9,14 +9,6 @@
   <meta name="mobile-web-app-capable" content="yes"> <!-- Fixed: Deprecated tag replaced -->
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="ระบบขอสั่งอะไหล่คลังสินค้านวนคร">
-  <!-- iOS-Specific Meta Tags (เพิ่มเติม) -->
-<meta name="apple-mobile-web-app-title" content="PartsGo">  <!-- ชื่อ app ใน home screen -->
-<meta name="apple-mobile-web-app-status-bar-style" content="default">  <!-- Status bar สี default -->
-<meta name="apple-mobile-web-app-capable" content="yes">  <!-- Fullscreen mode -->
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">  <!-- iOS icon 180x180 -->
-<link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png">  <!-- iPad -->
-<meta name="format-detection" content="telephone=no">  <!-- ปิด auto-link เบอร์โทร -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0, minimum-scale=1.0, viewport-fit=cover">  <!-- viewport-fit สำหรับ iPhone X+ notch -->  
   <link rel="apple-touch-icon" href="/icon-192.png">
   <!-- Enhanced Content Security Policy to reduce phishing risks -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob: https://drive.google.com https://lh3.googleusercontent.com; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
@@ -407,31 +399,48 @@
         color: #ecf0f1;
       }
       /* Header Setting Button */
-      .header-setting-btn {
-        background: linear-gradient(135deg, #f39c12, #e67e22);
-        color: white;
-        border: none;
-        padding: 6px 8px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 12px;
-        margin-left: auto;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 3px;
-      }
-      .header-setting-btn:hover {
-        background: linear-gradient(135deg, #e67e22, #d68910);
-        transform: translateY(-1px);
-      }
-      body.dark-mode .header-setting-btn {
-        background: linear-gradient(135deg, #f39c12, #e67e22);
-      }
-      body.dark-mode .header-setting-btn:hover {
-        background: linear-gradient(135deg, #e67e22, #d68910);
-      }
-      /* Install Button Styles - Compact & Themed */
+      /* ปุ่มเมนูสไตล์ Facebook (มุมขวาบน) */
+.header-setting-btn {
+  background-color: transparent;      /* พื้นใสแบบ FB */
+  color: #ffffff;                     /* ไอคอนสีขาวบน header น้ำเงิน */
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;                 /* วงกลมเหมือนปุ่มเมนู FB */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;                   /* ระยะห่างจากข้อความหัว */
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+/* ไอคอนเมนู */
+.header-setting-btn i {
+  font-size: 18px;
+}
+
+/* hover – วงกลมเทาอ่อนแบบ FB */
+.header-setting-btn:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+  transform: scale(1.05);
+}
+
+/* active – กดลงนิดนึง */
+.header-setting-btn:active {
+  transform: scale(0.97);
+}
+
+/* ---- Dark mode (เหมือน Facebook dark) ---- */
+body.dark-mode .header-setting-btn {
+  color: #e4e6eb;
+  background-color: transparent;
+}
+
+body.dark-mode .header-setting-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
 #install-btn {
   display: none; /* ซ่อนเริ่มต้น */
   position: fixed;
@@ -2511,33 +2520,56 @@ body.dark-mode .gallery-thumbnail-modal {
       height: 250px; /* Adjusted fixed height for mobile */
     }
     }
-  #toggleAllDataBtn {
-  background: linear-gradient(135deg, #42a5f5, #2196f3);
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 11px;
+ /* ปรับสไตล์ปุ่ม toggleAllDataBtn ให้เป็นปุ่มแบบ Tab Facebook */
+#toggleAllDataBtn {
+  background-color: transparent !important;
+  color: #65676b !important;
+  padding: 6px 14px !important;
+  border: none !important;
+  border-radius: 999px !important; /* pill shape */
+  font-size: 14px !important;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   margin-left: 8px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  box-shadow: none !important;
 }
+
+/* Hover แบบ Facebook */
 #toggleAllDataBtn:hover {
-  background: linear-gradient(135deg, #1976d2, #1565c0);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: #e4e6eb !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
+
+/* Active แบบ Facebook (น้ำเงิน + เส้นขีดล่าง) */
+#toggleAllDataBtn.active,
+#toggleAllDataBtn[aria-selected="true"] {
+  color: #1877f2 !important;
+  background-color: #e7f3ff !important;
+  box-shadow: inset 0 -2px 0 #1877f2 !important;
+}
+
+/* ---- Dark Mode ---- */
 body.dark-mode #toggleAllDataBtn {
-  background: linear-gradient(135deg, #1abc9c, #16a085);
+  color: #e4e6eb !important;
+  background-color: transparent !important;
 }
+
 body.dark-mode #toggleAllDataBtn:hover {
-  background: linear-gradient(135deg, #16a085, #1abc9c);
+  background-color: rgba(255,255,255,0.08) !important;
 }
+
+body.dark-mode #toggleAllDataBtn.active,
+body.dark-mode #toggleAllDataBtn[aria-selected="true"] {
+  color: #4599ff !important;
+  background-color: rgba(24, 119, 242, 0.18) !important;
+  box-shadow: inset 0 -2px 0 #4599ff !important;
+}
+
       .new-footer {
   position: fixed;
   bottom: 50px; /* ขึ้นเหนือ bottom-nav */
@@ -2567,6 +2599,88 @@ body.dark-mode #all .all-pagination .all-page-number.active,
 body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
   background: linear-gradient(135deg, #ff8c00, #e67e22) !important; /* ส้มเข้มสำหรับ dark mode */
   color: white !important;
+}
+/* ปุ่มสไตล์ Tab แบบ Facebook */
+.canva-button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;          /* ให้เป็นเม็ดยาแบบแท็บ FB */
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  min-width: 60px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  /* base (เหมือน FB: ตัวอักษรเทา พื้นใส ไม่มีเงา) */
+  background-color: transparent;
+  color: #65676b;
+  box-shadow: none;
+}
+
+/* ไอคอนในปุ่ม */
+.canva-button i {
+  font-size: 14px;
+}
+
+/* hover – พื้นเทาอ่อนแบบ FB */
+.canva-button:hover {
+  background-color: #e4e6eb;
+  box-shadow: none;
+}
+
+/* สถานะ active แบบแท็บที่ถูกเลือกใน FB */
+.canva-button.active,
+.canva-button[aria-selected="true"] {
+  color: #1877f2;
+  background-color: #e7f3ff;
+  /* เส้นเน้นด้านล่างแบบแท็บ FB (ใช้ box-shadow จำลอง) */
+  box-shadow: inset 0 -2px 0 #1877f2;
+}
+
+/* ---- Light mode ---- */
+body.light-mode .canva-button {
+  color: #65676b;
+  background-color: transparent;
+}
+
+body.light-mode .canva-button:hover {
+  background-color: #e4e6eb;
+}
+
+body.light-mode .canva-button.active,
+body.light-mode .canva-button[aria-selected="true"] {
+  color: #1877f2;
+  background-color: #e7f3ff;
+  box-shadow: inset 0 -2px 0 #1877f2;
+}
+
+/* ---- Dark mode (เทาเข้ม + น้ำเงินอ่อนแบบ FB Dark) ---- */
+body.dark-mode .canva-button {
+  color: #e4e6eb;
+  background-color: transparent;
+}
+
+body.dark-mode .canva-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .canva-button.active,
+body.dark-mode .canva-button[aria-selected="true"] {
+  color: #4599ff;
+  background-color: rgba(24, 119, 242, 0.18);
+  box-shadow: inset 0 -2px 0 #4599ff;
+}
+.today-warning {
+  font-size: 18px;
+  color: #e74c3c;               /* สีแดงแบบเตือน */
+  font-weight: 600;
+  margin-bottom: 6px;           /* ให้มีระยะห่างกับปุ่มค้นหา */
+  text-align: left;
 }
    </style>
   </head>
@@ -2625,9 +2739,9 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
           <div id="searchContainer">
             <input type="text" id="searchInput1" placeholder="ค้นหา ตัวกรองหลัก" />
             <input type="text" id="searchInput2" placeholder="ค้นหา ตัวกรองย่อย" />
-            <button id="searchButton" class="refresh-button">
-              <i class="fas fa-redo"></i>
-            </button>
+            <button id="searchButton" class="canva-button">
+                <i class="fas fa-redo"></i> <span>Clear</span>
+                </button>
           </div>
           <div id="error-container">
             <p id="error-message">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
@@ -2674,7 +2788,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
               <label for="itemsPerPage">Show</label>
               <select id="itemsPerPage">
                 <option value="10">10</option>
-                <option value="20">20</option>
+                <option value="20" selected>20</option>
                 <option value="30">30</option>
               </select>
             </div>
@@ -2684,8 +2798,8 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
           <div id="searchContainerImages">
             <input type="text" id="searchInputImages1" placeholder="ค้นหา ตัวกรองหลัก" />
             <input type="text" id="searchInputImages2" placeholder="ค้นหา ตัวกรองย่อย" />
-            <button id="searchButtonImages" class="refresh-button-images">
-              <i class="fas fa-redo"></i>
+            <button id="searchButtonImages" class="canva-button">
+                <i class="fas fa-redo"></i> <span>Clear</span>
             </button>
           </div>
           <div id="error-container-images">
@@ -2717,17 +2831,24 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
               <label for="itemsPerPageImages">Show</label>
               <select id="itemsPerPageImages">
                 <option value="10">10</option>
-                <option value="20">20</option>
+                <option value="20" selected>20</option>
                 <option value="30">30</option>
               </select>
             </div>
           </div>
         </div>
         <div id="today" class="tab-content">
+           <!-- ข้อความเตือนใหม่ -->
+            <div class="today-warning">
+              ระบบจะตัดรอบการเบิกในเวลา 14.50น.
+            </div>
           <div id="searchContainer">
             <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
             <!-- Toggle button for all data -->
-            <button id="toggleAllDataBtn" title="รอเบิก"><i class="fas fa-clock"></i></button>
+           <button id="toggleAllDataBtn" class="canva-button" title="รอเบิก" aria-selected="false">
+  <i class="fas fa-clock"></i>
+  <span>ประวัติเบิก</span>
+</button>
           </div>
           <div id="error-container-today" class="error-container" style="display: none;">
             <p id="error-message-today">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
@@ -2967,7 +3088,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
       let allData = [];
       let tempFilteredData = [];
       let currentPage = 1;
-      let itemsPerPage = 10;
+      let itemsPerPage = 20;
       let currentFilteredData = [];
       // Images tab variables (moved up)
       const searchInputImages1 = document.getElementById("searchInputImages1");
@@ -2986,7 +3107,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
       let allDataImages = [];
       let tempFilteredDataImages = [];
       let currentPageImages = 1;
-      let itemsPerPageImages = 10;
+      let itemsPerPageImages = 20;
       let currentFilteredDataImages = [];
       // Today tab variables (moved up)
       const modal = document.getElementById("detailModal");
@@ -3609,6 +3730,8 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     `,
     focusConfirm: false,
     showCancelButton: true,
+    showCloseButton: true,
+    closeButtonHtml: '<i class="fas fa-times"></i>', // ไอคอน X สวย ๆ (ต้องมี Font Awesome)
     confirmButtonText: 'ยืนยัน',
     cancelButtonText: 'ยกเลิก',
     allowOutsideClick: false,
@@ -3879,81 +4002,126 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
         });
       }
       // Popup สรุปข้อมูล
+            // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
+      // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
+            // แสดงรูปในหน้าต่างสรุป – ใช้ thumbnail?id= แบบเดียวกับที่คุณใช้ใน modal (แสดงได้ 100%)
       let imageHtml = '';
+      let imageIds = [];
+
       if (row.UrlWeb && row.UrlWeb.trim()) {
-        imageHtml = `<img src="${row.UrlWeb}" alt="Product Image" class="summary-image" onerror="this.style.display='none'">`;
+        // รองรับทุกแบบของ Google Drive link
+        const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) || 
+                      row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
+                      row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+          imageIds = [match[1]];
+        }
+      }
+
+      if (imageIds.length > 0) {
+        const fileId = imageIds[0];
+        imageHtml = `
+          <img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w500" 
+               alt="รูปอะไหล่" 
+               style="width:120px; height:120px; object-fit:cover; border-radius:20px; 
+                      border:5px solid #1877f2; box-shadow:0 10px 30px rgba(24,118,242,0.5);
+                      margin-bottom:18px;"
+               onerror="this.style.display='none'; this.nextSibling.style.display='block';">
+          <div style="display:none; text-align:center; color:#e74c3c; font-size:14px; margin-top:10px;">โหลดรูปไม่สำเร็จ</div>
+        `;
+      } else {
+        // ถ้าไม่มีรูปเลย → ไอคอนสวย ๆ
+        imageHtml = `
+          <div style="width:120px; height:120px; background:linear-gradient(135deg,#e3f2fd,#bbdefb); 
+                      border-radius:20px; display:flex; align-items:center; justify-content:center; 
+                      margin:0 auto 18px; box-shadow:0 8px 25px rgba(24,118,242,0.3);">
+            <i class="fas fa-box-open" style="font-size:50px; color:#1877f2;"></i>
+          </div>
+        `;
       }
       const summaryResult = await Swal.fire({
-        title: 'สรุปข้อมูลการเบิก',
-        html: `
-          ${imageHtml}
-          <div style="text-align: left; font-size: 14px;">
-            <p><strong>Material:</strong> ${row.Material || ''}</p>
-            <p><strong>Description:</strong> ${row.Description || ''}</p>
-            <p><strong>จำนวน:</strong> ${formValues.quantity}</p>
-            <p><strong>รหัสพนักงาน:</strong> ${formValues.employeeCode}</p>
-            <p><strong>ชื่อพนักงาน:</strong> ${formValues.employeeName}</p>
-            <p><strong>ทีม:</strong> ${formValues.team}</p>
-            <p><strong>เบอร์ติดต่อ:</strong> ${formValues.contact}</p>
-            <p><strong>เลขที่ Call:</strong> ${formValues.callNumber || 'ไม่มี'}</p>
-            <p><strong>Call Type:</strong> ${formValues.callType || 'ไม่มี'}</p>
-            <p><strong>หมายเหตุ:</strong> ${formValues.remark || 'ไม่มี'}</p>
-            <hr style="margin: 10px 0;">
-          </div>
-        `,
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'ยืนยันการเบิก',
-        cancelButtonText: 'แก้ไข',
+        title: '<strong style="font-size:22px; color:#1877f2; font-family:\'Kanit\',sans-serif;">สรุปการขอเบิกอะไหล่</strong>',
+        width: window.innerWidth <= 480 ? '95%' : '650px',
+        padding: '20px',
+        background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#ffffff',
+        backdrop: 'rgba(0,0,0,0.8)',
         allowOutsideClick: false,
         allowEscapeKey: false,
-        customClass: {
-          title: 'dark-blue-title'
-        },
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-check-circle"></i> ยืนยันการเบิก',
+        cancelButtonText: '<i class="fas fa-edit"></i> แก้ไขข้อมูล',
+        reverseButtons: true,
+        buttonsStyling: false,
+
+        html: `
+          <div style="text-align:center;">
+            ${imageHtml}
+          </div>
+
+          <div style="background:${document.body.classList.contains('dark-mode')?'#2d2d2d':'#f8fbff'}; border-radius:18px; padding:20px; margin:10px 0; box-shadow:0 6px 20px rgba(0,0,0,0.12);">
+            <table style="width:100%; border-collapse:separate; border-spacing:0 14px; font-size:15.5px; line-height:1.5;">
+              <tr><td style="color:#555; font-weight:600; width:40%;">Material</td>
+                  <td style="font-weight:bold; text-align:right; color:#1a1a1a;">${row.Material || '-'}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">Description</td>
+                  <td style="text-align:right;">${row.Description || '-'}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">จำนวนขอเบิก</td>
+                  <td style="font-weight:bold; color:#e74c3c; font-size:20px; text-align:right;">${formValues.quantity} ชิ้น</td></tr>
+              <tr><td style="color:#555; font-weight:600;">คลังวิภาวดีมี</td>
+                  <td style="color:#27ae60; font-weight:bold; text-align:right;">${vibhavadiValue.toLocaleString()} ชิ้น</td></tr>
+              <tr><td style="color:#555; font-weight:600;">รหัสพนักงาน</td>
+                  <td style="text-align:right;">${formValues.employeeCode}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">ชื่อช่าง</td>
+                  <td style="color:#2980b9; font-weight:bold; text-align:right;">${formValues.employeeName}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">ทีม / หน่วยงาน</td>
+                  <td style="text-align:right;">${formValues.team || '-'}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">เบอร์ติดต่อ</td>
+                  <td style="text-align:right;">${formValues.contact}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">เลขที่ Call</td>
+                  <td style="text-align:right;">${formValues.callNumber || '<span style="color:#999;">ไม่มี</span>'}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">Call Type</td>
+                  <td style="text-align:right;">
+                    ${formValues.callType 
+                      ? `<span style="background:#667eea;color:white;padding:6px 18px;border-radius:30px;font-weight:bold;font-size:15px;">${formValues.callType}</span>`
+                      : '<span style="color:#999;">ไม่มี</span>'}
+                  </td></tr>
+              ${formValues.remark ? 
+                `<tr><td style="color:#555; font-weight:600; vertical-align:top; padding-top:10px;">หมายเหตุ</td>
+                 <td style="color:#e74c3c; font-weight:bold; text-align:right; padding-top:10px;">${formValues.remark}</td></tr>` : ''}
+            </table>
+          </div>
+
+          <div style="margin-top:20px; padding:15px; background:#fff3cd; border-left:6px solid #f39c12; border-radius:12px; font-size:14.5px; color:#856404; text-align:center;">
+            <i class="fas fa-exclamation-triangle" style="margin-right:8px; font-size:18px;"></i>
+            กรุณาตรวจสอบข้อมูลให้ครบถ้วนก่อนกดยืนยัน
+          </div>
+        `,
+
         didOpen: () => {
-          // Ensure full blur backdrop for summary popup
-          const swalContainer = document.querySelector('.swal2-container');
-          if (swalContainer) {
-            swalContainer.style.zIndex = '99998';
-            swalContainer.style.position = 'fixed';
-            swalContainer.style.top = '0';
-            swalContainer.style.left = '0';
-            swalContainer.style.width = '100vw';
-            swalContainer.style.height = '100vh';
-            swalContainer.style.display = 'flex';
-            swalContainer.style.justifyContent = 'center';
-            swalContainer.style.alignItems = 'center';
-          }
-          const swalBackdrop = document.querySelector('.swal2-backdrop');
-          if (swalBackdrop) {
-            swalBackdrop.style.zIndex = '99997';
-            swalBackdrop.style.position = 'fixed';
-            swalBackdrop.style.top = '0';
-            swalBackdrop.style.left = '0';
-            swalBackdrop.style.width = '100vw';
-            swalBackdrop.style.height = '100vh';
-            swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-            swalBackdrop.style.backdropFilter = 'blur(8px)';
-          }
-          const swalPopup = document.querySelector('.swal2-popup');
-          if (swalPopup) {
-            swalPopup.style.zIndex = '99999';
-            swalPopup.style.position = 'relative';
-            swalPopup.style.margin = '0';
-            swalPopup.style.transform = 'none';
-            swalPopup.style.maxHeight = '90vh';
-            swalPopup.style.overflowY = 'auto';
-            swalPopup.style.width = 'auto';
-            swalPopup.style.maxWidth = '90vw';
-            if (window.innerWidth <= 768) {
-              swalPopup.style.width = '95vw';
-              swalPopup.style.padding = '15px';
-            }
-          }
+          const confirmBtn = document.querySelector('.swal2-confirm');
+          const cancelBtn = document.querySelector('.swal2-cancel');
+
+          confirmBtn.style.cssText = `
+            background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+            color: white !important;
+            padding: 14px 34px !important;
+            border-radius: 30px !important;
+            font-size: 17px !important;
+            font-weight: bold !important;
+            box-shadow: 0 6px 20px rgba(39,174,96,0.5) !important;
+          `;
+
+          cancelBtn.style.cssText = `
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+            color: white !important;
+            padding: 14px 34px !important;
+            border-radius: 30px !important;
+            font-size: 17px !important;
+            font-weight: bold !important;
+            box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
+          `;
         }
       });
       if (summaryResult.isConfirmed) {
-        // สร้าง JSON payload
         const jsonPayload = {
           material: row.Material || '',
           description: row.Description || '',
@@ -4038,6 +4206,15 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
               confirmButtonText: 'OK'
             }).then((result) => {
               if (result.isConfirmed) {
+                // ปิด Modal รายละเอียดอะไหล่ (ทั้ง #parts และ #images) ถ้าเปิดอยู่
+                const imageModal = document.getElementById('imageModal');
+                const imageModalImages = document.getElementById('imageModalImages');
+                if (imageModal && imageModal.style.display === 'block') {
+                  imageModal.style.display = 'none';
+                }
+                if (imageModalImages && imageModalImages.style.display === 'block') {
+                  imageModalImages.style.display = 'none';
+                }
                 Swal.fire({
                   title: 'กำลังเปลี่ยนหน้า...',
                   html: `
@@ -4541,18 +4718,38 @@ searchButtonImages.addEventListener("click", () => {
         if (event.target == modal) closeModal.click();
       };
       // Toggle pending only button event
-     toggleAllDataBtn.addEventListener('click', () => {
+    toggleAllDataBtn.addEventListener('click', () => {
+  // สลับ filter
   currentFilter = currentFilter === 'pending' ? 'history' : 'pending';
+
+  const icon = toggleAllDataBtn.querySelector('i');
+  const span = toggleAllDataBtn.querySelector('span');
+
   if (currentFilter === 'pending') {
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i>';
-    toggleAllDataBtn.title = 'ประวัติเบิก';
-  } else {
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i>';
+    // โหมด "รอเบิก"
+    icon.className = 'fas fa-clock';
+    span.textContent = 'ประวัติเบิก';
     toggleAllDataBtn.title = 'รอเบิก';
+
+    // สไตล์แท็บ Facebook: ถือว่าไม่ active (เป็น default)
+    toggleAllDataBtn.classList.remove('active');
+    toggleAllDataBtn.setAttribute('aria-selected', 'false');
+  } else {
+    // โหมด "ประวัติเบิก"
+    icon.className = 'fas fa-history';
+    span.textContent = 'รอเบิก';
+    toggleAllDataBtn.title = 'ประวัติเบิก';
+
+    // สไตล์แท็บ Facebook: ให้เป็น active (น้ำเงิน + เส้นขีดล่าง)
+    toggleAllDataBtn.classList.add('active');
+    toggleAllDataBtn.setAttribute('aria-selected', 'true');
   }
-  currentPageToday = 1; // Reset page on toggle
+
+  // รีหน้า และโหลดตารางใหม่
+  currentPageToday = 1;
   updateTableToday();
 });
+
       // Items per page change event for today tab
       itemsPerPageSelectToday.addEventListener("change", () => {
         itemsPerPageToday = parseInt(itemsPerPageSelectToday.value, 10);
@@ -5406,40 +5603,6 @@ window.addEventListener('appinstalled', () => {
   if (installBtn) installBtn.style.display = 'none';
   deferredPrompt = null;
 });
-// iOS Detection & Manual Install Guide (เพิ่มใหม่)
-function isIOS() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-}
-
-function showIOSInstallPrompt() {
-  if (!isIOS() || localStorage.getItem('ios-installed')) return;  // ถ้าติดตั้งแล้ว ซ่อน
-
-  // แสดง banner คำแนะนำ (ใช้ Swal หรือ custom div)
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      title: '📱 ติดตั้ง PartGo บน iOS',
-      html: `
-        <p>กดปุ่ม <strong>Share</strong> (สี่เหลี่ยมมีลูกศร) ด้านล่าง แล้วเลือก <strong>Add to Home Screen</strong></p>
-        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TaGFyZSAmIEFkZCB0byBIb21lPC90ZXh0Pjwvc3ZnPg==" alt="iOS Share Guide" style="width: 100%; margin-top: 10px;">
-        <p>PartGo จะเพิ่มเป็น app บนหน้าจอหลัก!</p>
-      `,
-      icon: 'info',
-      confirmButtonText: 'เข้าใจแล้ว',
-      showCancelButton: false,
-      timer: 10000  // Auto-close หลัง 10s
-    }).then(() => {
-      localStorage.setItem('ios-installed', 'true');  // Mark as shown
-    });
-  }
-}
-
-// เรียกเมื่อ load เสร็จ (หลัง checkLoginStatus)
-window.addEventListener('load', () => {
-  if (isIOS()) {
-    setTimeout(showIOSInstallPrompt, 3000);  // แสดงหลัง 3s
-  }
-  // Existing SW registration...
-});      
     </script>
   </body>
 </html>
