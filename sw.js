@@ -1,99 +1,153 @@
-// sw.js — เวอร์ชันสุดยอด สำหรับระบบขอเบิกอะไหล่ (แนะนำ 100%)
-// ปรับปรุง: 24 พ.ย. 2568
+// sw.js — PartsGo v12.7 (26 พ.ย. 2568) — เวอร์ชันแก้บั๊ก clone แล้ว
 
-const VERSION = 'v9';
-const SHELL_CACHE = `shell-${VERSION}`;
-const DATA_CACHE = `data-${VERSION}`;   // แยก cache ข้อมูลต่างหาก
+const VERSION = 'v14.3';                     // เปลี่ยนเลขเวอร์ชันทุกครั้งที่อัปเดตไฟล์นี้
+const CACHE   = `partgo-${VERSION}`;
 
-// === App Shell (สิ่งที่ต้องโหลดทันที) ===
-const APP_SHELL = [
+// ไฟล์หลักของแอป (ภายในโดเมนเราเอง)
+const SHELL = [
   '/',
   '/index.html',
+  '/style.css',
   '/manifest.json',
+  '/icon-152.png',
+  '/icon-180.png',
   '/icon-192.png',
   '/icon-512.png',
   '/offline.html'
 ];
 
-// === ข้อมูลที่ต้องการเร็ว + ออฟไลน์ได้ ===
+// ไฟล์ภายนอก (CDN, ฟอนต์, ไลบรารี)
+const SHELL_EXTERNAL = [
+  'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css',
+  'https://cdn.jsdelivr.net/npm/sweetalert2@11',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
+  'https://fonts.googleapis.com/css2?family=Itim&family=Poppins:wght@300;400;600&family=Kanit:wght@300;400;600&display=swap'
+];
+
+// URL ข้อมูลจาก Google Sheet (ผ่าน opensheet)
 const DATA_URLS = [
   'https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap',
   'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request',
   'https://opensheet.elk.sh/1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk/Call_Report',
-  'https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information'
+  'https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information',
+  'https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapimage'
 ];
 
-// ============= INSTALL =============
-self.addEventListener('install', e => {
-  console.log('SW: ติดตั้งเวอร์ชัน', VERSION);
-  e.waitUntil(
-    caches.open(SHELL_CACHE).then(cache => cache.addAll(APP_SHELL))
+// ติดตั้ง + cache shell ทั้งหมด แล้ว skipWaiting ทันที
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => cache.addAll([...SHELL, ...SHELL_EXTERNAL]))
       .then(() => self.skipWaiting())
   );
 });
 
-// ============= ACTIVATE =============
-self.addEventListener('activate', e => {
-  console.log('SW: เปิดใช้งานเวอร์ชัน', VERSION);
-  e.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.map(key => {
-        if (key !== SHELL_CACHE && key !== DATA_CACHE) {
-          console.log('SW: ลบ cache เก่า →', key);
-          return caches.delete(key);
-        }
-      })
-    )).then(() => self.clients.claim())
+// เปิดใช้งาน → ลบ cache เก่า + claim clients
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(k => k !== CACHE)
+          .map(k => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
-// ============= FETCH (สำคัญที่สุด!) =============
-self.addEventListener('fetch', e => {
-  const req = e.request;
-  const url = new URL(req.url);
+// ดักทุก request
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  const url = request.url;
 
-  // ข้าม POST, chrome-extension, googleusercontent
-  if (req.method !== 'GET' || 
-      url.protocol === 'chrome-extension:' || 
-      url.hostname.includes('googleusercontent.com')) {
+  // ข้าม POST, chrome-extension, และ script.google.com
+  if (
+    request.method !== 'GET' ||
+    url.includes('chrome-extension') ||
+    url.includes('script.google.com')
+  ) {
     return;
   }
 
-  // 1. App Shell + Static files → Cache First
-  if (url.origin === location.origin || APP_SHELL.some(u => url.pathname === u)) {
-    e.respondWith(
-      caches.match(req).then(cached => cached || fetch(req).then(res => {
-        caches.open(SHELL_CACHE).then(c => c.put(req, res.clone()));
-        return res;
-      }))
-    );
-    return;
-  }
+  const requestUrl = new URL(url);
 
-  // 2. ข้อมูลจาก Opensheet → Stale-While-Revalidate (เร็วสุด + ข้อมูลสดเสมอ)
-  if (DATA_URLS.some(dataUrl => url.href.startsWith(dataUrl))) {
-    e.respondWith(
-      caches.open(DATA_CACHE).then(cache => {
-        return cache.match(req).then(cached => {
-          // มีแคช → ส่งทันที (เร็วสุด!)
-          if (cached) {
-            // อัปเดตพื้นหลังเงียบ ๆ
-            fetch(req).then(fresh => {
-              cache.put(req, fresh.clone());
-            }).catch(() => {}); // ออฟไลน์ก็ไม่เป็นไร
-            return cached;
+  // เช็คว่าเป็น resource ภายในโดเมนเราไหม
+  const isSameOrigin = requestUrl.origin === location.origin;
+
+  // 1) App Shell (ไฟล์ของเราเอง + CDN ที่กำหนด) → Cache First
+  const isShellLocal = isSameOrigin && SHELL.includes(requestUrl.pathname);
+  const isShellExternal = SHELL_EXTERNAL.includes(url);
+
+  if (isShellLocal || isShellExternal) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        if (cached) return cached;
+
+        // ถ้าไม่มีใน cache → ดึงจากเน็ตแล้วเก็บ cache (clone ก่อนใช้)
+        return fetch(request).then(res => {
+          if (res && res.status === 200) {
+            const resClone = res.clone();          // 🔹 clone ก่อน
+            caches.open(CACHE).then(cache => {
+              cache.put(request, resClone);
+            });
           }
-          // ไม่มีแคช → ดึงจริง แล้วเก็บ
-          return fetch(req).then(res => {
-            if (res.ok) cache.put(req, res.clone());
-            return res;
-          });
+          return res;
+        }).catch(() => {
+          // ถ้าโหลดไม่ได้เลย → ใช้ offline.html สำหรับของเราเอง
+          if (isSameOrigin) {
+            return caches.match('/offline.html') ||
+                   new Response('Offline', { status: 503 });
+          }
+          return new Response('Offline', { status: 503 });
         });
       })
     );
     return;
   }
 
-  // 3. ทุกอย่างอื่น ๆ → Network First (เช่น GAS POST)
-  e.respondWith(fetch(req).catch(() => caches.match('/offline.html')));
+  // 2) ข้อมูลจาก opensheet → Stale-While-Revalidate
+  const isDataUrl = DATA_URLS.some(base => url.startsWith(base.split('?')[0]));
+
+  if (isDataUrl) {
+    event.respondWith(
+      fetch(request).then(networkRes => {
+        if (networkRes && networkRes.status === 200) {
+          const clone = networkRes.clone();        // 🔹 clone ก่อน
+          caches.open(CACHE).then(cache => {
+            cache.put(request, clone);
+          });
+        }
+        return networkRes;
+      }).catch(() => {
+        // ถ้าเน็ตหลุด → ใช้ข้อมูลเก่าที่ cache ไว้
+        return caches.match(request) ||
+               new Response(
+                 JSON.stringify({ error: 'offline' }),
+                 { headers: { 'Content-Type': 'application/json' } }
+               );
+      })
+    );
+    return;
+  }
+
+  // 3) อย่างอื่น → Network First + fallback เป็น offline.html
+  event.respondWith(
+    fetch(request).catch(() => {
+      if (isSameOrigin) {
+        return caches.match('/offline.html') ||
+               new Response('Offline', { status: 503 });
+      }
+      return new Response('Offline', { status: 503 });
+    })
+  );
+});
+
+// รับ message จากหน้าเว็บ (เช็คเวอร์ชัน / skipWaiting)
+self.addEventListener('message', event => {
+  if (event.data?.type === 'GET_VERSION') {
+    event.source.postMessage({ type: 'VERSION', version: VERSION });
+  }
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
