@@ -50,8 +50,9 @@
       <!-- Compact Top Header with Logo and Setting Button -->
       <div class="header">
         <div class="header-title">
-          <span> ระบบขอสั่งอะไหล่จากคลังนวนคร</span>
-        </div>
+  <img src="/icon-192.png" alt="PartsGo" class="header-logo">
+  <span>สั่งอะไหล่คลังนวนคร</span>
+</div>
         <button id="install-btn" title="ติดตั้ง PartsGo บนหน้าจอหลัก" style="display:none !important;">
   <i class="fas fa-download"></i> ติดตั้ง
 </button>
@@ -59,7 +60,7 @@
   <i class="fas fa-bell"></i>
   <span id="notificationBadge" class="notification-badge" style="display:none;">!</span>
 </button>
-        <span id="userNameSmall" class="user-name-small"></span>
+        <span id="userNameSmall" class="user-name-small" style="display: none;"></span>
         <button class="header-setting-btn" onclick="showSettings()" title="ตั้งค่า"><i class="fas fa-bars"></i></button>
       </div>
       <div class="loading" id="loading">
@@ -116,11 +117,10 @@
           <!-- Image Modal for #parts -->
           <div id="imageModal" class="image-modal">
             <div class="image-modal-content">
-              <span class="image-close" id="closeImageModal">×</span>
-             
-              <div id="imageModalContent"></div>
-            </div>
-          </div>
+            <span class="image-close" id="closeImageModal">&times;</span>
+            <div id="imageModalContent"></div>
+               </div>
+              </div>
           <div id="pagination" class="pagination">
             <button id="firstPage">
               <i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i>
@@ -205,6 +205,10 @@
             <div class="spinner"></div>
             <p>กำลังโหลดข้อมูล...</p>
           </div>
+          <div id="todayEmptyMessage"
+           style="display:none; text-align:center; padding:12px; color:#4caf50; font-weight:bold; font-size:32px !important;">
+             ทำเบิกทั้งหมดแล้ว
+            </div>
           <div class="table-container">
             <table id="data-table-today">
               <thead>
@@ -248,12 +252,11 @@
             </div>
           </div>
           <div id="detailModal" class="modal">
-            <div class="modal-content">
-              <span class="close" id="closeModal">×</span>
-              <h2>รายละเอียด</h2>
-              <div id="modalContent"></div>
-            </div>
-          </div>
+  <div class="modal-content" style="max-width:600px; width:90%;">
+    <span id="closeModal" class="close">&times;</span>
+    <div id="modalContent"></div>
+  </div>
+</div>
         </div>
         <div id="all" class="tab-content">
           <div id="searchContainerAll">
@@ -384,14 +387,14 @@
       <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 12px; font-size: 14px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <i class="fas fa-building" style="color: #1976d2;"></i>
-          <strong>หน่วยงาน:</strong> <span id="modalUserTeam" style="color: #1976d2; font-weight: 500;">กำลังโหลด...</span>
+          <strong></strong> <span id="modalUserTeam" style="color: #1976d2; font-weight: 500;">กำลังโหลด...</span>
         </div>
       </div>
     </div>
     <!-- ปุ่มประกาศ (เฉพาะ 7512411) -->
     <div id="adminAnnouncementSection" style="display: none; margin: 20px 0;">
       <button onclick="openAnnouncementEditor()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 16px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(231,76,60,0.4);">
-        <i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน
+        <i class="fas fa-bullhorn"></i> ตั้งค่าข้อความแจ้งเตือน
       </button>
     </div>
     <!-- เลือกธีม -->
@@ -413,7 +416,7 @@
       </button>
     </div>
     <div style="margin-top: 24px; padding: 16px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 16px; text-align: center; font-size: 11px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-  <p style="margin: 6px 0; font-weight: bold; font-size: 13px;">PartsGo เวอร์ชัน <span id="appVersion">v10</span></p>
+  <p style="margin: 6px 0; font-weight: bold; font-size: 13px;">PartsGo Ver. <span id="appVersion">v10</span></p>
   <p style="margin: 4px 0; opacity: 0.9;">© 2025 คลังสินค้า SparePart วิภาวดี 62</p>
   <p style="margin: 4px 0; opacity: 0.8; font-size: 10px;">สงวนลิขสิทธิ์ • ระบบภายในสำหรับพนักงานเท่านั้น</p>
 </div>
@@ -528,7 +531,7 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
       const ageHours = (Date.now() - timestamp) / (1000 * 60 * 60);
       if (ageHours < expireHours) {
         console.log("ใช้ Cache:", key);
-        return data;  // แก้ตรงนี้
+        return data;
       }
     }
   } catch (e) {
@@ -538,18 +541,31 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
   console.log("ดึงข้อมูลใหม่จากเซิร์ฟเวอร์:", key);
   const freshData = await fetchFn();
 
+  // ✅ บันทึกข้อมูล + timestamp ลง Cache
   try {
     const cache = await caches.open(CACHE_NAME);
-    await cache.put(key, new Response(JSON.stringify({
-      data: freshData,
-      timestamp: Date.now()
-    })));
-  } catch (e) {}
+    await cache.put(
+      key,
+      new Response(
+        JSON.stringify({
+          data: freshData,
+          timestamp: Date.now()
+        })
+      )
+    );
+  } catch (e) {
+    // ถ้าบันทึก cache ไม่ได้ (เช่น พื้นที่เต็ม) → ไม่ error
+  }
 
   return freshData;
 }
       // Global employee data
       let employeeData = [];
+      let employeeDataLoaded = false;        // เพิ่มบรรทัดนี้
+      let partsDataLoaded = false;          // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
+      let imagesDataLoaded = false;   
+      let todayDataLoaded = false;
+      let pendingDataLoaded = false;      // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
       // Global search values for syncing between parts and images tabs
       let globalSearch1 = '';
       let globalSearch2 = '';
@@ -587,6 +603,7 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
       let currentPage = 1;
       let itemsPerPage = 20;
       let currentFilteredData = [];
+      
       // Images tab variables (moved up)
       const searchInputImages1 = document.getElementById("searchInputImages1");
       const searchInputImages2 = document.getElementById("searchInputImages2");
@@ -608,6 +625,7 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
       let currentFilteredDataImages = [];
       let imageDatabase = {}; // { Material: ["id1", "id2", ...] }
       let imageDbLoaded = false;
+      let vibhavadiStockMap = {}; // { "Material": จำนวนวิภาวดี }
       // Today tab variables (moved up)
       const modal = document.getElementById("detailModal");
       const modalContent = document.getElementById("modalContent");
@@ -683,6 +701,7 @@ toggleAllDataBtn.addEventListener("click", () => {
       let currentPagePending = 1;
       let itemsPerPagePending = 20;
       let sortConfigPending = { column: null, direction: 'asc' };
+      let employeeDataPromise = null; 
       // Image Modal Handling for #parts (moved up)
       const imageModal = document.getElementById('imageModal');
       const imageModalContent = document.getElementById('imageModalContent');
@@ -710,6 +729,13 @@ toggleAllDataBtn.addEventListener("click", () => {
           document.getElementById('themeSelect').value = theme;
         }
       }
+      function debounce(fn, delay = 300) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
       async function showSettings() {
 const currentTheme = localStorage.getItem('theme') || 'light';
 const savedUsername = localStorage.getItem('username');
@@ -721,10 +747,7 @@ document.getElementById('modalUserTeam').textContent = 'กำลังโหล
 document.getElementById('themeSelect').value = currentTheme;
 // ดึงหน่วยงาน
 try {
-if (employeeData.length === 0) {
-employeeData = await loadEmployeeData();
-}
-const user = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === savedUsername);
+const user = employeeData.find(e => e.IDRec?.toString().trim() === savedUsername);
 document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
 document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
 } catch (err) {
@@ -785,22 +808,32 @@ updateAppVersionDisplay();
         togglePasswordIcon.classList.toggle('fa-eye-slash');
         togglePasswordIcon.classList.toggle('fa-eye');
       }
-      async function loadEmployeeData() {
-        const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
-        const employeeSheetName = "Employee";
-        const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
-        try {
-          const response = await fetch(employeeUrl);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          return data;
-        } catch (error) {
-          console.error("Error loading employee data:", error);
-          throw error;
-        }
-      }
+      // แทนที่ฟังก์ชัน loadEmployeeData() เดิมทั้งหมดด้วยอันนี้
+async function loadEmployeeData() {
+  if (employeeDataLoaded && employeeData.length > 0) {
+    return employeeData;
+  }
+  // ถ้ามี promise ค้างอยู่ → ใช้ promise เดิม (ป้องกัน fetch ซ้ำ)
+  if (employeeDataPromise) {
+    return employeeDataPromise;
+  }
+  const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
+  const employeeSheetName = "Employee";
+  const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
+  employeeDataPromise = fetch(employeeUrl)
+    .then(res => res.json())
+    .then(data => {
+      employeeData = data;
+      employeeDataLoaded = true;
+      employeeDataPromise = null; // รีเซ็ตหลังโหลดเสร็จ
+      return data;
+    })
+    .catch(err => {
+      employeeDataPromise = null;
+      throw err;
+    });
+  return employeeDataPromise;
+}
       async function handleLogin() {
         const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
@@ -841,40 +874,48 @@ updateAppVersionDisplay();
           console.error('Login error:', error);
         }
       }
-     function checkLoginStatus() {
+     async function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
+  
   if (isLoggedIn && savedUsername) {
-  loginModal.classList.remove('active');
-  appContent.classList.add('logged-in');
- 
-  // โหลดฐานข้อมูลรูปภาพใหม่ทันทีที่ล็อกอินสำเร็จ
-  loadImageDatabase().then(() => {
-    console.log("ฐานข้อมูลรูปภาพพร้อมใช้งานแล้ว");
-    // โหลดข้อมูลหลักหลังจากโหลดรูปเรียบร้อย
-    showTab('parts'); // หรือ loadData();
-  }); โหล
-    // userNameSmall.textContent = localStorage.getItem('userName') || ''; // Comment out or delete
-    // Auto-load default tab if needed
-    if (document.querySelector('.nav-btn.active')) {
+    // เริ่มโหลดข้อมูลทันที
+    loginModal.classList.remove('active');
+    appContent.classList.add('logged-in');
+    
+    try {
+      // ✅ รอให้โหลด employee data ให้เสร็จก่อน
+      await loadEmployeeData();
+      // โหลดฐานข้อมูลรูปภาพ
+      loadImageDatabase().catch(console.error);
+      
+      // แสดงชื่อผู้ใช้ (ถ้ามี)
+      const savedUserName = localStorage.getItem('userName') || savedUsername;
+      if (userNameSmall) userNameSmall.textContent = savedUserName;
+      
+      // โหลดแท็บเริ่มต้น
       showTab('parts');
+    } catch (err) {
+      console.error("โหลดข้อมูลเริ่มต้นล้มเหลว:", err);
+      // ถ้าโหลดไม่ได้ → ให้ล็อกเอาท์
+      handleLogout();
     }
-    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค) – เช็คเฉพาะ hide เท่านั้
   } else {
     loginModal.classList.add('active');
     appContent.classList.remove('logged-in');
-    // userNameSmall.textContent = ''; // Comment out or delete
-    // Clear invalid session
+    // ล้าง session เท่านั้น
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
     localStorage.removeItem('userName');
-    localStorage.removeItem('savedPassword'); // Clear saved password on invalid session
   }
-  // Load saved credentials if remember me was checked
+  
+  // โหลดการตั้งค่า "Remember me"
   if (localStorage.getItem('rememberMe') === 'true') {
     const savedUsername = localStorage.getItem('savedUsername');
-    if (savedUsername) usernameInput.value = savedUsername;
-    rememberMeCheckbox.checked = true;
+    if (savedUsername && usernameInput) {
+      usernameInput.value = savedUsername;
+      rememberMeCheckbox.checked = true;
+    }
   }
 }
      function handleLogout() {
@@ -896,78 +937,49 @@ updateAppVersionDisplay();
       });
       // === showTab(tabId) เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showTab(tabId) {
-  // 1. ซ่อนทุก tab-content ก่อน
-  const contents = document.querySelectorAll(".tab-content");
-  contents.forEach(tab => tab.classList.remove("active"));
-  // 2. แสดง tab ที่เลือก
-  const targetTab = document.getElementById(tabId);
-  if (targetTab) {
-    targetTab.classList.add("active");
-  } else {
-    console.error("ไม่พบ tab:", tabId);
-    return;
-  }
-  // 3. อัปเดต Bottom Navigation (ปุ่มล่าง)
-  const navButtons = document.querySelectorAll(".nav-btn");
-  navButtons.forEach(btn => btn.classList.remove("active"));
-  const activeNav = document.querySelector(`[data-tab="${tabId}"]`);
-  if (activeNav) activeNav.classList.add("active");
-  // 4. แสดง Loading (ยกเว้น pending-calls ที่มี loading ภายใน)
-  if (tabId !== "pending-calls") {
-    document.getElementById("loading").style.display = "flex";
-  }
-  // 5. โหลดข้อมูลตามแท็บ
+  document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+  const target = document.getElementById(tabId);
+  if (!target) return;
+  target.classList.add("active");
+
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  document.querySelector(`[data-tab="${tabId}"]`)?.classList.add("active");
+
+  document.getElementById("loading").style.display = "flex";
+
   switch (tabId) {
     case "parts":
-      // คืนค่าค้นหาเดิม (sync กับ tab images)
-      document.getElementById('searchInput1').value = globalSearch1;
-      document.getElementById('searchInput2').value = globalSearch2;
-      // บังคับโหลดฐานข้อมูลรูปภาพใหม่ทุกครั้ง (สำคัญมาก!)
-      loadImageDatabase().then(async () => {  // เพิ่ม async ที่นี่
-    console.log("โหลดฐานข้อมูลรูปภาพเรียบร้อยสำหรับแท็บ Parts");
-    await loadData();  // เพิ่ม await
-  }).catch(err => {
-    console.error("โหลดฐานรูปภาพล้มเหลว:", err);
-    loadData();
-  });
-  break;
-    case "images":
-      // คืนค่าค้นหาเดิม
-      document.getElementById('searchInputImages1').value = globalSearch1;
-      document.getElementById('searchInputImages2').value = globalSearch2;
-      // บังคับโหลดฐานข้อมูลรูปภาพใหม่ทุกครั้ง
-      loadImageDatabase().then(async () => {  // เพิ่ม async ที่นี่
-    console.log("โหลดฐานข้อมูลรูปภาพเรียบร้อยสำหรับแท็บ Images");
-    await loadImagesData();  // เพิ่ม await
-  }).catch(err => {
-    console.error("โหลดฐานรูปภาพล้มเหลว:", err);
-    loadImagesData();
-  });
-  break;
-    case "today":
-      loadTodayData();
+      searchInput1.value = globalSearch1 || '';
+      searchInput2.value = globalSearch2 || '';
+      loadImageDatabase();
+      if (!partsDataLoaded) loadData().then(() => { partsDataLoaded = true; hideLoading(); });
+      else hideLoading();
       break;
-    case "all":
-      loadAllData();
+    case "images":
+      searchInputImages1.value = globalSearch1 || '';
+      searchInputImages2.value = globalSearch2 || '';
+      loadImageDatabase();
+      if (!imagesDataLoaded) loadImagesData().then(() => { imagesDataLoaded = true; hideLoading(); });
+      else hideLoading();
+      break;
+    case "today":
+      if (!todayDataLoaded) loadTodayData().then(() => { todayDataLoaded = true; hideLoading(); });
+      else hideLoading();
       break;
     case "pending-calls":
-      loadPendingCallsData();
+      if (!pendingDataLoaded) loadPendingCallsData().then(() => { pendingDataLoaded = true; hideLoading(); });
+      else hideLoading();
       break;
     default:
-      console.warn("ไม่รู้จัก tabId:", tabId);
       hideLoading();
   }
-  // 6. เลื่อนขึ้นบนสุดทุกครั้งที่เปลี่ยนแท็บ (UX ดี)
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 // ฟังก์ชันปิด Loading (ใช้ร่วมกับ showTab)
 function hideLoading() {
   document.getElementById("loading").style.display = "none";
 }
-      function hideLoading() {
-        document.getElementById("loading").style.display = "none";
-      }
-      function showQRCode() {
+  function showQRCode() {
         Swal.fire({
           title: '📷 สแกน QR Code',
           html: `
@@ -1099,16 +1111,17 @@ function initSwiper(modal, totalSlides) {
   // รองรับการปัดนิ้วบนมือถือ
   let startX = 0;
   container.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-  }, { passive: true });
-  container.addEventListener('touchend', e => {
-    const endX = e.changedTouches[0].clientX;
-    const diff = startX - endX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) nextBtn.click(); // ปัดซ้าย → ถัดไป
-      else prevBtn.click(); // ปัดขวา → ย้อนกลับ
-    }
-  }, { passive: true });
+  startX = e.touches[0].clientX;
+}, { passive: true });
+
+container.addEventListener('touchend', e => {
+  const endX = e.changedTouches[0].clientX;
+  const diff = startX - endX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) nextBtn.click();
+    else prevBtn.click();
+  }
+}, { passive: true });
   update(); // แสดงรูปแรก
 }
 function initSwiper(modal) {
@@ -1150,12 +1163,18 @@ function initSwiper(modal) {
  
   // Touch Swipe
   let startX = 0;
-  container.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-  container.addEventListener('touchend', e => {
-    const endX = e.changedTouches[0].clientX;
-    if (startX - endX > 50) goNext(); // Swipe left
-    if (endX - startX > 50) goPrev(); // Swipe right
-  });
+  container.addEventListener('touchstart', e => {
+  startX = e.touches[0].clientX;
+}, { passive: true });
+
+container.addEventListener('touchend', e => {
+  const endX = e.changedTouches[0].clientX;
+  const diff = startX - endX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) nextBtn.click();
+    else prevBtn.click();
+  }
+}, { passive: true });
  
   // Keyboard (arrow keys)
   document.addEventListener('keydown', e => {
@@ -1225,108 +1244,119 @@ document.addEventListener('keydown', (e) => {
         errorContainer.style.display = "none";
         loadData();
       });
-     function renderTable(data) {
-        if (!tableBody) {
-          console.error("Table body for #data-table not found");
-          Swal.fire({
-            icon: "error",
-            title: "ข้อผิดพลาด",
-            text: "ไม่พบตารางข้อมูล กรุณาตรวจสอบโครงสร้างหน้าเว็บ",
-            confirmButtonText: "ตกลง",
-          });
-          return;
-        }
-        tableBody.innerHTML = "";
-        data.forEach((row) => {
-          const tr = document.createElement("tr");
-          const requisitionTd = document.createElement("td");
-          const btn = document.createElement("button");
-          btn.textContent = "เบิก";
-          btn.className = "requisition-button";
-          btn.onclick = () => showRequisitionDialog(row);
-          requisitionTd.appendChild(btn);
-          tr.appendChild(requisitionTd);
-          const columns = [
-            "UrlWeb",
-            "Material",
-            "Description",
-            "วิภาวดี",
-            "Unrestricted",
-            "Rebuilt",
-            "หมายเหตุ",
-            "Product",
-            "OCRTAXT"
-          ];
-          // Convert values to numbers for comparison
-          const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
-          const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
-          // Determine styling based on conditions
-          let textColor = "";
-          let fontWeight = "";
-          if (vibhavadiValue > 0) {
-            textColor = "#4caf50"; // Green
-            fontWeight = "bold";
-          } else if (vibhavadiValue === 0 && unrestrictedValue > 0) {
-            textColor = "#2196f3"; // Blue
-            fontWeight = "bold";
-          }
-          columns.forEach((col) => {
-            const td = document.createElement("td");
-            let value = row[col] || "";
-            if (col === "วิภาวดี" || col === "Unrestricted") {
-              if (value && !isNaN(value)) {
-                value = Number(value).toLocaleString("en-US", {
-                  maximumFractionDigits: 0,
-                });
-              } else if (value === "0" || value === 0) {
-                value = "";
-              }
-            }
-            if ((col === "หมายเหตุ" || col === "Rebuilt") && value) {
-              td.style.color = "#d32f2f";
-              td.style.fontWeight = "bold";
-            }
-            // Apply conditional styling to Material, Description, วิภาวดี, and Unrestricted
-            if (
-              col === "Material" ||
-              col === "Description" ||
-              col === "วิภาวดี" ||
-              col === "Unrestricted"
-            ) {
-              if (textColor) td.style.color = textColor;
-              if (fontWeight) td.style.fontWeight = fontWeight;
-            }
-            if (col === "UrlWeb" && value) {
-              // Changed to button that opens modal instead of external link
-              const imageBtn = document.createElement("button");
-              imageBtn.innerHTML = '<i class="fas fa-image"></i>';
-              imageBtn.className = "image-button";
-              imageBtn.onclick = () => showDetailModal(row, 'imageModal', 'imageModalContent'); // Use unified function
-              td.appendChild(imageBtn);
-            } else {
-              td.textContent = value;
-            }
-            tr.appendChild(td);
-          });
-          tableBody.appendChild(tr);
-        });
+   function renderTableToday(data) {
+  if (!tableBodyToday) {
+    console.error("Table body for #data-table-today not found");
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+
+    // Status (สีเขียว/แดง)
+    const statusTd = document.createElement("td");
+    const status = row["status"] || "";
+    statusTd.textContent = status;
+    statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
+    tr.appendChild(statusTd);
+
+    // IDRow
+    const idRowTd = document.createElement("td");
+    idRowTd.textContent = row["IDRow"] || "";
+    tr.appendChild(idRowTd);
+
+    // คอลัมน์หลัก
+    const columns = [
+      "Timestamp", "material", "description", "quantity",
+      "vibhavadi", "employeeName", "team", "callNumber",
+      "callType", "remark"
+    ];
+
+    columns.forEach(col => {
+      const td = document.createElement("td");
+      let value = row[col] || "";
+
+      // จัดรูปแบบเวลา
+      if (col === "Timestamp") {
+        value = formatTimestamp(value);
       }
+
+      // จัดรูปแบบตัวเลข
+      if ((col === "quantity" || col === "vibhavadi") && value !== "") {
+        const num = parseFloat(value);
+        if (!isNaN(num)) {
+          value = num.toLocaleString("en-US", { maximumFractionDigits: 0 });
+        }
+      }
+
+      // ไฮไลต์ remark
+      if (col === "remark" && value) {
+        td.style.color = "#d32f2f";
+        td.style.fontWeight = "bold";
+      }
+
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+
+    // ปุ่ม "ดูรายละเอียด"
+    const detailTd = document.createElement("td");
+    const detailBtn = document.createElement("button");
+    detailBtn.textContent = "ดูรายละเอียด";
+    detailBtn.className = "pending-detail-button";
+    detailBtn.onclick = () => {
+      // สร้าง HTML สำหรับ modal
+      const detailHtml = columns.map(col => {
+        let label = "";
+        switch (col) {
+          case "Timestamp": label = "วันเวลา"; break;
+          case "material": label = "Material"; break;
+          case "description": label = "Description"; break;
+          case "quantity": label = "จำนวน"; break;
+          case "vibhavadi": label = "วิภาวดี"; break;
+          case "employeeName": label = "ชื่อช่าง"; break;
+          case "team": label = "หน่วยงาน"; break;
+          case "callNumber": label = "เลขที่ Call"; break;
+          case "callType": label = "Call Type"; break;
+          case "remark": label = "หมายเหตุ"; break;
+          default: label = col;
+        }
+        let value = row[col] || "";
+        if (col === "Timestamp") {
+          value = formatTimestamp(value);
+        }
+        if ((col === "quantity" || col === "vibhavadi") && value !== "") {
+          const num = parseFloat(value);
+          if (!isNaN(num)) {
+            value = num.toLocaleString("en-US");
+          }
+        }
+        const valueHtml = col === "remark" && value
+          ? `<span style="color:#d32f2f; font-weight:bold;">${value}</span>`
+          : `<span>${value}</span>`;
+        return `<div style="margin:6px 0;"><strong>${label}:</strong> ${valueHtml}</div>`;
+      }).join("");
+
+      modalContent.innerHTML = detailHtml;
+      modal.style.display = "block";
+    };
+    detailTd.appendChild(detailBtn);
+    tr.appendChild(detailTd);
+
+    fragment.appendChild(tr);
+  });
+
+  tableBodyToday.innerHTML = "";
+  tableBodyToday.appendChild(fragment);
+}
       async function showRequisitionDialog(row) {
   document.body.style.overflow = 'hidden';
-  const history = {
-    employeeCode: getFromLocalStorage('employeeCode'),
-    team: getFromLocalStorage('team'),
-    contact: getFromLocalStorage('contact'),
-    callNumber: getFromLocalStorage('callNumber'),
-    callType: getFromLocalStorage('callType'),
-   
-  };
   const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
   const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
   const remark = row["หมายเหตุ"] || '';
   const hasStockVibha = vibhavadiValue > 0;
-  let proceed = true;
-
   // ตรวจสอบเงื่อนไขใหม่: ถ้านวนคร = 0 และหมายเหตุไม่ว่าง
   if (unrestrictedValue === 0 && remark.trim() !== '') {
     const replacementWarning = await Swal.fire({
@@ -1339,7 +1369,7 @@ document.addEventListener('keydown', (e) => {
       allowOutsideClick: false,
       allowEscapeKey: false,
       showCancelButton: true,
-      confirmButtonText: '<i class="fas fa-check"></i> ยืนยันเบิกต่อ',
+      confirmButtonText: '<i class="fas fa-check"></i> ยืนยัน',
       cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
       reverseButtons: true,
       buttonsStyling: false,
@@ -1347,7 +1377,7 @@ document.addEventListener('keydown', (e) => {
         <div style="text-align:center; margin:20px 0;">
           <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
           <div style="font-size:18px; font-weight:600; color:#e67e22;">
-            Material: ${row.Material || ''}
+            ${row.Material || ''}
           </div>
           <div style="font-size:18px; font-weight:600; color:#e67e22; margin-top:10px;">
             ${row.Description || ''}
@@ -1355,9 +1385,22 @@ document.addEventListener('keydown', (e) => {
           <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
             คลังนวนครไม่มีของเหลือแล้ว
           </div>
-          <div style="margin-top:20px; padding:16px; background:#e8f5e8; border-left:6px solid #27ae60; border-radius:12px; font-size:15px; color:#27ae60;">
-            <i class="fas fa-info-circle"></i>
-            อาจมีอะไหล่ทดแทน: ${remark}
+          <div style="
+    margin-top:20px; 
+    padding:18px 20px; 
+    background:#f0fff4; 
+    border:2px solid #2ecc71; 
+    border-radius:14px; 
+    font-size:17px; 
+    color:#1e874b; 
+    font-weight:bold;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+">
+    <i class="fas fa-exclamation-circle" style="color:#2ecc71; margin-right:8px;"></i>
+    อาจมีอะไหล่ทดแทน: 
+    <span style="color:#0a0; font-size:18px;">${remark}</span>
+</div>
+
           </div>
         </div>
       `,
@@ -1394,83 +1437,126 @@ document.addEventListener('keydown', (e) => {
 
   // ตรวจสอบเงื่อนไขเดิม: คลังวิภาวดีมีของ
   if (hasStockVibha) {
-        const warningResult = await Swal.fire({
-          title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
-          iconColor: '#f39c12',
-          width: window.innerWidth <= 480 ? '90%' : '560px',
-          padding: '30px 20px',
-          background: document.body.classList.contains('dark-mode') ? '#2d2d2d' : '#ffffff',
-          backdrop: 'rgba(0,0,0,0.85)',
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          showCancelButton: true,
-          confirmButtonText: '<i class="fas fa-check"></i> ยืนยันเบิกต่อ',
-          cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
-          reverseButtons: true,
-          buttonsStyling: false,
-          html: `
-            <div style="text-align:center; margin:20px 0;">
-              <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
-              <div style="font-size:18px; font-weight:600; color:#e67e22;">
-                คลังวิภาวดีมีของอยู่
-              </div>
-              <div style="font-size:32px; font-weight:bold; color:#27ae60; margin:12px 0;">
-                ${vibhavadiValue.toLocaleString()} ชิ้น
-              </div>
-              <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
-                กรุณาตรวจสอบว่าจำเป็นต้องเบิกจากนวนครจริงหรือไม่
-              </div>
-              <div style="margin-top:20px; padding:16px; background:#e8f5e8; border-left:6px solid #27ae60; border-radius:12px; font-size:15px; color:#27ae60;">
-                <i class="fas fa-info-circle"></i>
-                หากยืนยัน ระบบจะดึงจากคลังนวนครแทน
-              </div>
-            </div>
-          `,
-          didOpen: () => {
-            const confirmBtn = document.querySelector('.swal2-confirm');
-            const cancelBtn = document.querySelector('.swal2-cancel');
-            confirmBtn.style.cssText = `
-              background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
-              color: white !important;
-              padding: 14px 36px !important;
-              border-radius: 30px !important;
-              font-size: 17px !important;
-              font-weight: bold !important;
-              box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
-            `;
-            cancelBtn.style.cssText = `
-              background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
-              color: white !important;
-              padding: 14px 36px !important;
-              border-radius: 30px !important;
-              font-size: 17px !important;
-              font-weight: bold !important;
-              box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
-            `;
-          }
-        });
-        // ถ้ากดยกเลิก → ออกเลย
-        if (warningResult.isDismissed) {
-  Swal.close(); // ปิดหน้าต่างเบิกทั้งหมด (จริง ๆ ไม่ใส่ก็ได้ แต่ไม่เป็นไร)
-  // ✅ รีเซ็ตสภาพหน้าจอให้กลับมาดู tab ค้นหาได้ปกติ
-  document.body.style.overflow = 'auto'; // เผื่อ SweetAlert ล็อก scroll ไว้
-  window.scrollTo({
-    top: 0,
-    left: 0,
-    behavior: 'instant' // หรือ 'smooth' ถ้าอยากให้เลื่อนนิ่ม ๆ
-  });
-  return; // หยุดทุกอย่าง
-}
+    const warningResult = await Swal.fire({
+      title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
+      iconColor: '#f39c12',
+      width: window.innerWidth <= 480 ? '90%' : '560px',
+      padding: '30px 20px',
+      background: document.body.classList.contains('dark-mode') ? '#2d2d2d' : '#ffffff',
+      backdrop: 'rgba(0,0,0,0.85)',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-check"></i> ยืนยัน',
+      cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
+      reverseButtons: true,
+      buttonsStyling: false,
+      html: `
+        <div style="text-align:center; margin:20px 0;">
+          <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
+          <div style="font-size:18px; font-weight:600; color:#e67e22;">
+            คลังวิภาวดีมีของอยู่
+          </div>
+          <div style="font-size:32px; font-weight:bold; color:#27ae60; margin:12px 0;">
+            ${vibhavadiValue.toLocaleString()} ชิ้น
+          </div>
+          <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
+            กรุณาตรวจสอบว่าจำเป็นต้องเบิกจากนวนครจริงหรือไม่
+          </div>
+          <div style="
+    margin-top:20px; 
+    padding:16px; 
+    background:#e8f5e8; 
+    border-left:6px solid #27ae60; 
+    border-radius:12px; 
+    font-size:16px; 
+    color:#1e874b;
+    font-weight:bold;
+    display:flex;
+    align-items:center;
+    gap:10px;
+">
+    <i class="fas fa-info-circle" style="font-size:20px;"></i>
+    <span>หากยืนยัน ระบบจะดึงจากคลังนวนครแทน</span>
+</div>
+
+        </div>
+      `,
+      didOpen: () => {
+        const confirmBtn = document.querySelector('.swal2-confirm');
+        const cancelBtn = document.querySelector('.swal2-cancel');
+        confirmBtn.style.cssText = `
+          background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+          color: white !important;
+          padding: 14px 36px !important;
+          border-radius: 30px !important;
+          font-size: 17px !important;
+          font-weight: bold !important;
+          box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
+        `;
+        cancelBtn.style.cssText = `
+          background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+          color: white !important;
+          padding: 14px 36px !important;
+          border-radius: 30px !important;
+          font-size: 17px !important;
+          font-weight: bold !important;
+          box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
+        `;
       }
-  if (employeeData.length === 0) {
-    employeeData = await loadEmployeeData();
+    });
+    if (warningResult.isDismissed) {
+      Swal.close();
+      document.body.style.overflow = 'auto';
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      return;
+    }
   }
-  // ตัวแปร selectedCallType ย้ายมาอยู่นอก didOpen เพื่อให้ preConfirm เข้าถึงได้
+
+  // ========== ส่วนฟอร์มเบิก (ไม่เปลี่ยน) ==========
   let selectedCallType = '';
-  Swal.fire({
-    title: '📋 เบิกอะไหล่นวนคร',
-    html: `
+  const history = {
+    employeeCode: getFromLocalStorage('employeeCode'),
+    team: getFromLocalStorage('team'),
+    contact: getFromLocalStorage('contact'),
+    callNumber: getFromLocalStorage('callNumber'),
+    callType: getFromLocalStorage('callType'),
+  };
+
+Swal.fire({
+  title: '📋 เบิกอะไหล่นวนคร',
+  html: `
       <style>
+        /* ====== ปรับหน้าตา Popup ทั้งหมด ====== */
+        .custom-swal-popup {
+          border-radius: 18px !important;
+          padding: 18px 20px !important;
+        }
+
+        .swal2-title {
+          font-size: 20px !important;
+          margin-bottom: 8px !important;
+        }
+
+        /* แสดง Material + Description ตรงกลาง */
+        .material-header {
+          text-align: center;
+          padding: 10px 12px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #e0f2ff, #f3e5ff);
+          margin-bottom: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .material-code {
+          font-size: 18px;
+          font-weight: 700;
+        }
+        .material-desc {
+          margin-top: 4px;
+          font-size: 14px;
+        }
+
+        /* Autocomplete เดิม */
         .autocomplete-items {
           position: absolute;
           border: 1px solid #ccc;
@@ -1492,21 +1578,37 @@ document.addEventListener('keydown', (e) => {
         .autocomplete-item:hover {
           background-color: #f1f1f1;
         }
+
+        /* Label */
         .swal2-label {
           text-align: left !important;
           display: block !important;
-          margin: 8px 0 4px !important;
-          font-weight: bold !important;
+          margin: 6px 0 4px !important;
+          font-weight: 600 !important;
           width: 100% !important;
+          font-size: 13px !important;
         }
+
+        /* ช่องกรอกข้อมูล */
         .swal2-input, .swal2-select {
           width: 100% !important;
           margin: 4px 0 !important;
-          padding: 6px !important;
+          padding: 8px 10px !important;
           box-sizing: border-box !important;
           font-size: 14px !important;
-          height: 36px !important;
+          height: 38px !important;
+          border-radius: 8px !important;
+          border: 1px solid #ddd !important;
+          background-color: #fafafa !important;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
         }
+        .swal2-input:focus, .swal2-select:focus {
+          border-color: #667eea !important;
+          box-shadow: 0 0 0 2px rgba(102,126,234,0.2) !important;
+          background-color: #ffffff !important;
+          outline: none !important;
+        }
+
         .error-message {
           color: red !important;
           font-size: 12px !important;
@@ -1518,6 +1620,7 @@ document.addEventListener('keydown', (e) => {
           border: 2px solid red !important;
           box-shadow: 0 0 5px rgba(255, 0, 0, 0.5) !important;
         }
+
         #swal-employee-name-display, #swal-team-display {
           color: #4caf50 !important;
           font-weight: bold !important;
@@ -1527,6 +1630,7 @@ document.addEventListener('keydown', (e) => {
           border-radius: 4px !important;
           text-align: left !important;
         }
+
         /* Canva-like Call Type buttons */
         .call-type-container {
           display: flex;
@@ -1573,28 +1677,79 @@ document.addEventListener('keydown', (e) => {
           background: linear-gradient(135deg, #444, #555);
           transform: translateY(-1px);
         }
+
+        /* ปุ่มยืนยัน/ยกเลิก */
+        .swal2-actions {
+          margin-top: 16px !important;
+          gap: 8px !important;
+        }
+        .swal2-confirm-btn, .swal2-cancel-btn {
+          min-width: 110px;
+          padding: 8px 18px;
+          border-radius: 999px;
+          border: none;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .swal2-confirm-btn {
+          background: linear-gradient(135deg, #4caf50, #2e7d32);
+          color: #fff;
+          box-shadow: 0 3px 8px rgba(76, 175, 80, 0.4);
+        }
+        .swal2-confirm-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 5px 12px rgba(76, 175, 80, 0.6);
+        }
+        .swal2-cancel-btn {
+          background: #f5f5f5;
+          color: #666;
+          border: 1px solid #ddd;
+        }
+        .swal2-cancel-btn:hover {
+          background: #eeeeee;
+          transform: translateY(-1px);
+        }
       </style>
-      <div class="swal2-label">📦 Material: ${row.Material || ''}</div>
-      <div class="swal2-label">📝 Description: ${row.Description || ''}</div>
+
+      <!-- แสดง 30000279 Cofrimel Pump Boy Spray Rotors ตรงกลาง -->
+      <div class="material-header">
+        <div class="material-code">${row.Material || ''}</div>
+        <div class="material-desc">${row.Description || ''}</div>
+      </div>
+
       <label class="swal2-label">🔢 จำนวน</label>
       <input id="swal-quantity" class="swal2-input" type="number" value="1" min="1">
       <span id="swal-quantity-error" class="error-message"></span>
+
       <label class="swal2-label">🆔 รหัสพนักงาน</label>
-      <input id="swal-employee-code" class="swal2-input" placeholder="7xxxxxx">
-      <div id="employee-code-history" class="autocomplete-items" style="display:none;"></div>
+      <div style="position:relative;">
+        <input id="swal-employee-code" class="swal2-input" placeholder="7xxxxxx">
+        <div id="employee-code-history" class="autocomplete-items" style="display:none;"></div>
+      </div>
       <span id="swal-employee-code-error" class="error-message"></span>
+
       <label class="swal2-label">👤 ชื่อพนักงาน</label>
       <div id="swal-employee-name-display"></div>
+
       <label class="swal2-label">👥 ทีม</label>
       <div id="swal-team-display"></div>
+
       <label class="swal2-label">📞 เบอร์ติดต่อ</label>
-      <input id="swal-contact" class="swal2-input" placeholder="เช่น 08xxxxxxxx">
-      <div id="contact-history" class="autocomplete-items" style="display:none;"></div>
+      <div style="position:relative;">
+        <input id="swal-contact" class="swal2-input" placeholder="เช่น 08xxxxxxxx">
+        <div id="contact-history" class="autocomplete-items" style="display:none;"></div>
+      </div>
       <span id="swal-contact-error" class="error-message"></span>
+
       <label class="swal2-label">📄 เลขที่ Call</label>
-      <input id="swal-call-number" class="swal2-input" placeholder="2... หรือ ...">
-      <div id="call-number-history" class="autocomplete-items" style="display:none;"></div>
+      <div style="position:relative;">
+        <input id="swal-call-number" class="swal2-input" placeholder="2... หรือ ...">
+        <div id="call-number-history" class="autocomplete-items" style="display:none;"></div>
+      </div>
       <span id="swal-call-number-error" class="error-message"></span>
+
       <label class="swal2-label">🗳️ Call Type</label>
       <div id="call-type-container" class="call-type-container">
         <button class="call-type-btn" data-value="I">I</button>
@@ -1603,20 +1758,35 @@ document.addEventListener('keydown', (e) => {
         <button class="call-type-btn" data-value="R">R</button>
       </div>
       <span id="swal-call-type-error" class="error-message"></span>
+
       <label class="swal2-label">🗒️ หมายเหตุ</label>
       <input id="swal-remark" class="swal2-input" placeholder="ไม่บังคับ">
       <span id="swal-remark-error" class="error-message"></span>
     `,
+  showCancelButton: true,
+  confirmButtonText: '✅ ยืนยันเบิก',
+  cancelButtonText: '❌ ยกเลิก',
+  buttonsStyling: false,
+  customClass: {
+    popup: 'custom-swal-popup',
+    confirmButton: 'swal2-confirm-btn',
+    cancelButton: 'swal2-cancel-btn'
+  },
+  // ใส่ preConfirm / didOpen เดิมของคุณต่อจากนี้
+  // preConfirm: () => { ... },
+  // didOpen: (popup) => { ... }
+
+
+
     focusConfirm: false,
     showCancelButton: true,
     showCloseButton: true,
-    closeButtonHtml: '<i class="fas fa-times"></i>', // ไอคอน X สวย ๆ (ต้องมี Font Awesome)
+    closeButtonHtml: '<i class="fas fa-times"></i>',
     confirmButtonText: 'ยืนยัน',
     cancelButtonText: 'ยกเลิก',
     allowOutsideClick: false,
     allowEscapeKey: false,
     didOpen: () => {
-      // Force high z-index and ensure backdrop covers full screen
       const swalContainer = document.querySelector('.swal2-container');
       if (swalContainer) {
         swalContainer.style.zIndex = '99998';
@@ -1662,17 +1832,17 @@ document.addEventListener('keydown', (e) => {
       const remarkInput = document.getElementById('swal-remark');
       const confirmButton = document.querySelector('.swal2-confirm');
       confirmButton.disabled = true;
-      // Handle Call Type button selection (Canva-like) - ใช้ selectedCallType จาก outer scope
+
       const callTypeButtons = document.querySelectorAll('.call-type-btn');
       callTypeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
           callTypeButtons.forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
-          selectedCallType = btn.dataset.value; // อัพเดทตัวแปรจาก outer scope
-          console.log('Selected Call Type:', selectedCallType); // Debug: ดูใน console
+          selectedCallType = btn.dataset.value;
           validateInputs();
         });
       });
+
       function setupAutocomplete(input, key, containerId) {
         input.addEventListener('input', () => {
           const container = document.getElementById(containerId);
@@ -1703,6 +1873,7 @@ document.addEventListener('keydown', (e) => {
       setupAutocomplete(callNumberInput, 'callNumber', 'call-number-history');
       const lastContact = getFromLocalStorage('contact')[0];
       if (lastContact) contactInput.value = lastContact;
+
       const inputs = [quantityInput, employeeCodeInput, contactInput, callNumberInput, remarkInput];
       function validateInputs() {
         const errors = {
@@ -1729,7 +1900,9 @@ document.addEventListener('keydown', (e) => {
           document.getElementById('swal-team-display').textContent = '';
           isValid = false;
         } else {
-          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
+          const employee = employeeData.find(e =>
+          String(e?.IDRec).trim() === employeeCode
+        );
           if (!employee || !employee.Name) {
             errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
             employeeCodeInput.classList.add('invalid-input');
@@ -1835,7 +2008,7 @@ document.addEventListener('keydown', (e) => {
           callNumberInput.classList.add('invalid-input');
           isValid = false;
         }
-        if (!selectedCallType) { // ตอนนี้เข้าถึง selectedCallType ได้แล้ว
+        if (!selectedCallType) {
           errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
           isValid = false;
         }
@@ -1850,7 +2023,6 @@ document.addEventListener('keydown', (e) => {
         if (selectedCallType) {
           saveToLocalStorage('callType', selectedCallType);
         }
-        console.log('Final Call Type:', selectedCallType); // Debug: ดูว่าส่งไปถูกไหม
         return {
           quantity: quantityInput.value,
           employeeCode: employeeCode,
@@ -1869,14 +2041,11 @@ document.addEventListener('keydown', (e) => {
       const formValues = result.value;
       const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
       const quantity = parseFloat(formValues.quantity) || 0;
-    
-            // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
-      // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
-            // แสดงรูปในหน้าต่างสรุป – ใช้ thumbnail?id= แบบเดียวกับที่คุณใช้ใน modal (แสดงได้ 100%)
+
+      // ========== ส่วนสรุป + ส่งข้อมูล (ไม่เปลี่ยน) ==========
       let imageHtml = '';
       let imageIds = [];
       if (row.UrlWeb && row.UrlWeb.trim()) {
-        // รองรับทุกแบบของ Google Drive link
         const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) ||
                       row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
                       row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
@@ -1896,7 +2065,6 @@ document.addEventListener('keydown', (e) => {
           <div style="display:none; text-align:center; color:#e74c3c; font-size:14px; margin-top:10px;">โหลดรูปไม่สำเร็จ</div>
         `;
       } else {
-        // ถ้าไม่มีรูปเลย → ไอคอนสวย ๆ
         imageHtml = `
           <div style="width:120px; height:120px; background:linear-gradient(135deg,#e3f2fd,#bbdefb);
                       border-radius:20px; display:flex; align-items:center; justify-content:center;
@@ -1905,6 +2073,7 @@ document.addEventListener('keydown', (e) => {
           </div>
         `;
       }
+
       const summaryResult = await Swal.fire({
         title: '<strong style="font-size:22px; color:#1877f2; font-family:\'Kanit\',sans-serif;">สรุปการขอเบิกอะไหล่</strong>',
         width: window.innerWidth <= 480 ? '95%' : '650px',
@@ -1981,13 +2150,13 @@ document.addEventListener('keydown', (e) => {
           `;
         }
       });
+
       if (summaryResult.isConfirmed) {
-        // ปิด modal รายละเอียดทุกรูปแบบที่อาจเปิดค้างอยู่
         const detailModal = document.getElementById('imageModal');
-        if (detailModal) detailModal.style.display = 'none';
         const imageModalImages = document.getElementById('imageModalImages');
+        if (detailModal) detailModal.style.display = 'none';
         if (imageModalImages) imageModalImages.style.display = 'none';
-        // สร้าง JSON payload
+
         const jsonPayload = {
           material: row.Material || '',
           description: row.Description || '',
@@ -2001,7 +2170,7 @@ document.addEventListener('keydown', (e) => {
           remark: formValues.remark || '',
           vibhavadi: vibhavadiValue.toString()
         };
-        // แสดง loading
+
         Swal.fire({
           title: 'กำลังบันทึกข้อมูล...',
           html: `
@@ -2014,7 +2183,6 @@ document.addEventListener('keydown', (e) => {
           allowOutsideClick: false,
           allowEscapeKey: false,
           didOpen: () => {
-            // Ensure full blur for loading popup
             const swalContainer = document.querySelector('.swal2-container');
             if (swalContainer) {
               swalContainer.style.zIndex = '99998';
@@ -2055,12 +2223,11 @@ document.addEventListener('keydown', (e) => {
             }
           }
         });
+
         try {
           const response = await fetch(gasUrl, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
           });
           const gasResult = await response.json();
@@ -2072,17 +2239,13 @@ document.addEventListener('keydown', (e) => {
               confirmButtonText: 'OK'
             }).then((result) => {
               if (result.isConfirmed) {
-                // ปิด Modal รายละเอียดอะไหล่ (ทั้ง #parts และ #images) ถ้าเปิดอยู่
                 const imageModal = document.getElementById('imageModal');
                 const imageModalImages = document.getElementById('imageModalImages');
-                if (imageModal && imageModal.style.display === 'block') {
-                  imageModal.style.display = 'none';
-                }
-                if (imageModalImages && imageModalImages.style.display === 'block') {
-                  imageModalImages.style.display = 'none';
-                }
+                if (imageModal && imageModal.style.display === 'block') imageModal.style.display = 'none';
+                if (imageModalImages && imageModalImages.style.display === 'block') imageModalImages.style.display = 'none';
+
                 Swal.fire({
-                  title: 'กำลังเปลี่ยนหน้า...',
+                  title: 'กำลังเปลี่ยนหน้าไปยังข้อมูลที่ท่านบันทึก...',
                   html: `
                     <div class="swal2-spinner-container">
                       <div class="swal2-spinner"></div>
@@ -2091,67 +2254,26 @@ document.addEventListener('keydown', (e) => {
                   `,
                   showConfirmButton: false,
                   allowOutsideClick: false,
-                  allowEscapeKey: false,
-                  didOpen: () => {
-                    // Ensure full blur for redirect popup
-                    const swalContainer = document.querySelector('.swal2-container');
-                    if (swalContainer) {
-                      swalContainer.style.zIndex = '99998';
-                      swalContainer.style.position = 'fixed';
-                      swalContainer.style.top = '0';
-                      swalContainer.style.left = '0';
-                      swalContainer.style.width = '100vw';
-                      swalContainer.style.height = '100vh';
-                      swalContainer.style.display = 'flex';
-                      swalContainer.style.justifyContent = 'center';
-                      swalContainer.style.alignItems = 'center';
-                    }
-                    const swalBackdrop = document.querySelector('.swal2-backdrop');
-                    if (swalBackdrop) {
-                      swalBackdrop.style.zIndex = '99997';
-                      swalBackdrop.style.position = 'fixed';
-                      swalBackdrop.style.top = '0';
-                      swalBackdrop.style.left = '0';
-                      swalBackdrop.style.width = '100vw';
-                      swalBackdrop.style.height = '100vh';
-                      swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                      swalBackdrop.style.backdropFilter = 'blur(8px)';
-                    }
-                    const swalPopup = document.querySelector('.swal2-popup');
-                    if (swalPopup) {
-                      swalPopup.style.zIndex = '99999';
-                      swalPopup.style.position = 'relative';
-                      swalPopup.style.margin = '0';
-                      swalPopup.style.transform = 'none';
-                      swalPopup.style.maxHeight = '90vh';
-                      swalPopup.style.overflowY = 'auto';
-                      swalPopup.style.width = 'auto';
-                      swalPopup.style.maxWidth = '90vw';
-                      if (window.innerWidth <= 768) {
-                        swalPopup.style.width = '95vw';
-                        swalPopup.style.padding = '15px';
-                      }
-                    }
-                  }
+                  allowEscapeKey: false
                 });
+
                 setTimeout(() => {
                   Swal.close();
                   showTab('today');
-                  // Fix for mobile scroll lock after tab switch
+                  loadTodayData();
                   setTimeout(() => {
                     document.body.style.overflow = 'auto';
                     const searchInputToday = document.getElementById('searchInputToday');
                     if (searchInputToday) {
                       searchInputToday.focus();
-                      searchInputToday.blur(); // Trigger a touch event to unlock scroll on mobile
+                      searchInputToday.blur();
                     }
-                    // Simulate a touch event to unlock scroll
                     if ('ontouchstart' in window) {
                       const event = new Event('touchstart', { bubbles: true });
                       document.body.dispatchEvent(event);
                     }
                   }, 100);
-                }, 4000); // เพิ่ม delay จาก 2000 เป็น 4000ms เพื่อให้ข้อมูลใหม่อัปเดตใน Sheet
+                }, 4000);
               }
             });
           } else {
@@ -2170,7 +2292,7 @@ document.addEventListener('keydown', (e) => {
     }
   });
 }
-      function saveToLocalStorage(key, value) {
+function saveToLocalStorage(key, value) {
         let items = JSON.parse(localStorage.getItem(key)) || [];
         if (!items.includes(value)) {
           items.unshift(value);
@@ -2207,6 +2329,107 @@ document.addEventListener('keydown', (e) => {
         renderTableData();
         renderPagination(currentFilteredData.length);
       }
+      // ✅ ประกาศ renderTable แบบ function declaration (hoist ได้)
+function renderTable(data) {
+  const tableBody = document.querySelector("#data-table tbody");
+  if (!tableBody) {
+    console.error("Table body for #data-table not found");
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+
+    // ปุ่มเบิก
+    const requisitionTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.textContent = "เบิก";
+    btn.className = "requisition-button";
+    btn.onclick = () => showRequisitionDialog(row);
+    requisitionTd.appendChild(btn);
+    tr.appendChild(requisitionTd);
+
+    // คอลัมน์หลัก
+    const columns = [
+      "UrlWeb", "Material", "Description", "วิภาวดี", "Unrestricted",
+      "Rebuilt", "หมายเหตุ", "Product", "OCRTAXT"
+    ];
+
+    const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
+    const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
+    let textColor = "";
+    let fontWeight = "";
+    if (vibhavadiValue > 0) {
+      textColor = "#4caf50";
+      fontWeight = "bold";
+    } else if (vibhavadiValue === 0 && unrestrictedValue > 0) {
+      textColor = "#2196f3";
+      fontWeight = "bold";
+    }
+
+    columns.forEach(col => {
+      const td = document.createElement("td");
+      let value = row[col] || "";
+
+      if ((col === "วิภาวดี" || col === "Unrestricted") && value !== "") {
+        const num = parseFloat(value);
+        if (!isNaN(num)) {
+          value = num.toLocaleString("en-US");
+        }
+      }
+
+      if ((col === "หมายเหตุ" || col === "Rebuilt") && value) {
+        td.style.color = "#d32f2f";
+        td.style.fontWeight = "bold";
+      }
+
+      if (["Material", "Description", "วิภาวดี", "Unrestricted"].includes(col)) {
+        if (textColor) td.style.color = textColor;
+        if (fontWeight) td.style.fontWeight = fontWeight;
+      }
+
+      if (col === "UrlWeb" && value) {
+        let fileId = "";
+        if (value.includes("/d/")) {
+          fileId = value.split("/d/")[1].split("/")[0];
+        } else if (value.includes("id=")) {
+          fileId = value.split("id=")[1].split("&")[0];
+        } else if (/^[a-zA-Z0-9-_]+$/.test(value.trim())) {
+          fileId = value.trim();
+        }
+        if (fileId) {
+          const imgContainer = document.createElement("div");
+          imgContainer.style.cursor = "pointer";
+          imgContainer.title = "คลิกเพื่อดูรายละเอียด";
+          const img = document.createElement("img");
+          img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w100-h100`;
+          img.alt = "รูปอะไหล่";
+          img.style.width = "60px";
+          img.style.height = "60px";
+          img.style.objectFit = "cover";
+          img.style.borderRadius = "6px";
+          img.loading = "lazy";
+          img.onerror = () => {
+            img.src = 'https://via.placeholder.com/60/ccc/999?text=NOIMG';
+          };
+          imgContainer.onclick = () => {
+            showDetailModal(row, "imageModal", "imageModalContent");
+          };
+          imgContainer.appendChild(img);
+          td.appendChild(imgContainer);
+        } else {
+          td.textContent = value;
+        }
+      } else {
+        td.textContent = value;
+      }
+      tr.appendChild(td);
+    });
+    fragment.appendChild(tr);
+  });
+  tableBody.innerHTML = "";
+  tableBody.appendChild(fragment);
+}
       function renderTableData() {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
@@ -2237,16 +2460,17 @@ document.addEventListener('keydown', (e) => {
         renderTableData();
         renderPagination(currentFilteredData.length);
       }
-      searchInput1.addEventListener("input", (e) => {
-        globalSearch1 = e.target.value;
-        document.getElementById("searchInputImages1").value = globalSearch1;
-        applyFilters();
-      });
-      searchInput2.addEventListener("input", (e) => {
-        globalSearch2 = e.target.value;
-        document.getElementById("searchInput2").value = globalSearch2;
-        applyFilters();
-      });
+      searchInput1.addEventListener("input", debounce(e => {
+  globalSearch1 = e.target.value;
+  document.getElementById("searchInputImages1").value = globalSearch1;
+  applyFilters();
+}));
+
+searchInput2.addEventListener("input", debounce(e => {
+  globalSearch2 = e.target.value;
+  document.getElementById("searchInputImages2").value = globalSearch2;
+  applyFilters();
+}));
                // ปุ่มแว่นตาใกล้ searchInput2 -> เคลียร์เฉพาะช่องของแท็บอะไหล่
       searchButton.addEventListener("click", () => {
         // เคลียร์ช่องค้นหาแท็บอะไหล่
@@ -2296,27 +2520,27 @@ document.addEventListener('keydown', (e) => {
         renderTableData();
         renderPagination(currentFilteredData.length);
       });
-      async function loadData() {
+     async function loadData() {
   document.getElementById("loading").style.display = "flex";
   errorContainer.style.display = "none";
-
   const cacheKey = "parts-data-main-sap";
   try {
     allData = await getCachedData(cacheKey, async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 90000);
-      const res = await fetch(url + "?_=" + Date.now(), { signal: controller.signal });
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (!res.ok) throw new Error("HTTP " + res.status);
       return await res.json();
-    }, 2); // Cache 2 ชั่วโมง (ปรับได้)
+    }, 24); // Cache 24 ชม.
 
     tempFilteredData = [...allData];
     currentFilteredData = [...allData];
     applyFilters();
     hideLoading();
+    partsDataLoaded = true;
   } catch (err) {
-    console.error(err);
+    console.error("โหลดข้อมูลอะไหล่ล้มเหลว:", err);
     errorContainer.style.display = "block";
     hideLoading();
   }
@@ -2431,16 +2655,17 @@ document.addEventListener('keydown', (e) => {
         renderTableDataImages();
         renderPaginationImages(currentFilteredDataImages.length);
       }
-      searchInputImages1.addEventListener("input", (e) => {
-        globalSearch1 = e.target.value;
-        document.getElementById("searchInput1").value = globalSearch1;
-        applyFiltersImages();
-      });
-      searchInputImages2.addEventListener("input", (e) => {
-        globalSearch2 = e.target.value;
-        document.getElementById("searchInput2").value = globalSearch2;
-        applyFiltersImages();
-      });
+      searchInputImages1.addEventListener("input", debounce(e => {
+  globalSearch1 = e.target.value;
+  document.getElementById("searchInput1").value = globalSearch1;
+  applyFiltersImages();
+}));
+
+searchInputImages2.addEventListener("input", debounce(e => {
+  globalSearch2 = e.target.value;
+  document.getElementById("searchInput2").value = globalSearch2;
+  applyFiltersImages();
+}));
      // ปุ่มแว่นตาใกล้ searchInputImages2 -> เคลียร์ทั้งคู่ + เคลียร์ฝั่งอะไหล่ด้วย ให้ค้นใหม่แบบว่าง
 searchButtonImages.addEventListener("click", () => {
   // เคลียร์ช่องค้นหาแท็บรูปภาพ
@@ -2496,43 +2721,41 @@ searchButtonImages.addEventListener("click", () => {
       async function loadImagesData() {
   document.getElementById("loading").style.display = "flex";
   errorContainerImages.style.display = "none";
-
   const cacheKey = "images-data-with-id";
-  getCachedData(cacheKey, async () => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000);
-    const res = await fetch(url + "?_=" + Date.now(), { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const raw = await res.json();
-    // กรองเฉพาะที่มี id (รูป)
-    return raw.filter(row => row.id && row.id.trim() !== "");
-  }, 4) // Cache 4 ชั่วโมง เพราะรูปเปลี่ยนช้ากว่า
-  .then(data => {
+  try {
+    const data = await getCachedData(cacheKey, async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const raw = await res.json();
+      return raw.filter(row => row.id && row.id.trim() !== "");
+    }, 24);
+
     allDataImages = data;
     tempFilteredDataImages = [...data];
     currentFilteredDataImages = [...data];
     applyFiltersImages();
     hideLoading();
-  })
-  .catch(err => {
-    console.error(err);
+    imagesDataLoaded = true;
+  } catch (err) {
+    console.error("โหลดข้อมูลรูปภาพล้มเหลว:", err);
     errorContainerImages.style.display = "block";
     hideLoading();
-  });
+  }
 }
       // โหลดข้อมูลรูปจาก Sheet ใหม่: MainSapimage
 // === แทนที่ฟังก์ชัน loadImageDatabase ด้วยเวอร์ชันนี้ ===
 async function loadImageDatabase() {
-  if (imageDbLoaded) {
+ if (imageDbLoaded) {
     console.log("ใช้ Cache ฐานข้อมูลรูปภาพ");
-    return;
+    return imageDatabase;
   }
-
   const cacheKey = "image-database-mainsapimage";
   try {
     imageDatabase = await getCachedData(cacheKey, async () => {
-      const res = await fetch(`https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapimage?_=${Date.now()}`);
+      const res = await fetch(`https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapimage`);
       const data = await res.json();
       const db = {};
       let count = 0;
@@ -2689,43 +2912,76 @@ function filterDataToday(data) {
   return filtered;
 }
 // อัปเดตตาราง (เรียกใช้ทุกครั้งที่มีการเปลี่ยนแปลง)
+// อัปเดตตาราง (เรียกใช้ทุกครั้งที่มีการเปลี่ยนแปลง)
 function updateTableToday() {
   const filteredData = filterDataToday(allDataToday);
   currentFilteredDataToday = filteredData;
+
+  const todayEmptyMessage = document.getElementById("todayEmptyMessage");
+  const keyword = searchInputToday.value.trim();
+
+  // ถ้าอยู่โหมด "รอเบิก" และไม่มีคำค้นหา และไม่พบข้อมูลเลย → แสดงข้อความ "ทำเบิกหมดแล้ว"
+  if (filteredData.length === 0 && showOnlyPending && !keyword) {
+    tableBodyToday.innerHTML = "";
+    renderPaginationToday(0);          // ปิดปุ่ม pagination
+    if (todayEmptyMessage) {
+      todayEmptyMessage.style.display = "block";
+    }
+    return; // ไม่ต้อง render ตารางต่อ
+  } else {
+    // ถ้ามีข้อมูล หรือไม่ใช่โหมดรอเบิก → ซ่อนข้อความ
+    if (todayEmptyMessage) {
+      todayEmptyMessage.style.display = "none";
+    }
+  }
+
   const startIndex = (currentPageToday - 1) * itemsPerPageToday;
   const endIndex = startIndex + itemsPerPageToday;
   const paginatedData = filteredData.slice(startIndex, endIndex);
   renderTableToday(paginatedData);
   renderPaginationToday(filteredData.length);
 }
+
       function renderTableToday(data) {
-        tableBodyToday.innerHTML = "";
-        data.forEach((row) => {
-          const tr = document.createElement("tr");
-          const statusTd = document.createElement("td");
-          const status = row["status"] || "";
-          statusTd.textContent = status;
-          statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
-          tr.appendChild(statusTd);
-          // Add IDRow column
-          const idRowTd = document.createElement("td");
-          idRowTd.textContent = row["IDRow"] || "";
-          tr.appendChild(idRowTd);
-          const columns = [
-            "Timestamp",
-            "material",
-            "description",
-            "quantity",
-            "vibhavadi",
-            "employeeName",
-            "team",
-            "CallNumber",
-            "CallType",
-            "remark",
-          ];
-          columns.forEach((col) => {
-  const td = document.createElement("td");
-  let value = row[col] || "";
+  tableBodyToday.innerHTML = "";
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+    const statusTd = document.createElement("td");
+    const status = row["status"] || "";
+    statusTd.textContent = status;
+    statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
+    tr.appendChild(statusTd);
+
+    // IDRow
+    const idRowTd = document.createElement("td");
+    idRowTd.textContent = row["IDRow"] || "";
+    tr.appendChild(idRowTd);
+
+    const columns = [
+      "Timestamp",
+      "material",
+      "description",
+      "quantity",
+      "vibhavadi",        // ← เราจะแทนที่ค่านี้ใหม่
+      "employeeName",
+      "team",
+      "CallNumber",
+      "CallType",
+      "remark",
+    ];
+
+    columns.forEach((col) => {
+      const td = document.createElement("td");
+      let value = row[col] || "";
+
+      // === ส่วนสำคัญ: แทนที่ค่าคอลัมน์ "vibhavadi" ด้วยข้อมูลจริงจาก MainSap ===
+      if (col === "vibhavadi") {
+        const material = (row["material"] || "").toString().trim();
+        const realStock = vibhavadiStockMap[material];
+        value = typeof realStock === 'number' ? realStock.toLocaleString() : "0";
+        td.style.color = realStock > 0 ? "#27ae60" : "#e74c3c";
+        td.style.fontWeight = "bold";
+      }
   if (col === "Timestamp") {
     value = formatTimestamp(value); // เพิ่มบรรทัดนี้
   }
@@ -2803,97 +3059,166 @@ function updateTableToday() {
         });
       }
       function renderPaginationToday(totalItems) {
-        const totalPages = Math.ceil(totalItems / itemsPerPageToday);
-        pageNumbersToday.innerHTML = "";
-        if (totalPages === 0) {
-          firstPageButtonToday.disabled = true;
-          prevPageButtonToday.disabled = true;
-          nextPageButtonToday.disabled = true;
-          lastPageButtonToday.disabled = true;
-          return;
-        }
-        // แสดงเฉพาะหน้าปัจจุบัน
-        const button = document.createElement("button");
-        button.textContent = currentPageToday;
-        button.className = "active";
-        button.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
-        pageNumbersToday.appendChild(button);
-        firstPageButtonToday.disabled = currentPageToday === 1;
-        prevPageButtonToday.disabled = currentPageToday === 1;
-        nextPageButtonToday.disabled = currentPageToday === totalPages;
-        lastPageButtonToday.disabled = currentPageToday === totalPages;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPageToday));
+
+  pageNumbersToday.innerHTML = "";
+
+  if (totalItems === 0) {
+    firstPageButtonToday.disabled = true;
+    prevPageButtonToday.disabled = true;
+    nextPageButtonToday.disabled = true;
+    lastPageButtonToday.disabled = true;
+    return;
+  }
+
+  const currentPageBtn = document.createElement("button");
+  currentPageBtn.textContent = currentPageToday;
+  currentPageBtn.className = "active";
+  currentPageBtn.disabled = true;
+  pageNumbersToday.appendChild(currentPageBtn);
+
+  const isFirst = currentPageToday === 1;
+  const isLast = currentPageToday >= totalPages;
+
+  firstPageButtonToday.disabled = isFirst;
+  prevPageButtonToday.disabled = isFirst;
+  nextPageButtonToday.disabled = isLast;
+  lastPageButtonToday.disabled = isLast;
+}
+      searchInputToday.addEventListener("input", debounce(() => {
+  currentPageToday = 1;
+  updateTableToday();
+}));
+      firstPageButtonToday.onclick = () => {
+  currentPageToday = 1;
+  updateTableToday();
+};
+
+prevPageButtonToday.onclick = () => {
+  if (currentPageToday > 1) {
+    currentPageToday--;
+    updateTableToday();
+  }
+};
+
+nextPageButtonToday.onclick = () => {
+  const totalPages = Math.ceil(currentFilteredDataToday.length / itemsPerPageToday);
+  if (currentPageToday < totalPages) {
+    currentPageToday++;
+    updateTableToday();
+  }
+};
+
+lastPageButtonToday.onclick = () => {
+  const totalPages = Math.ceil(currentFilteredDataToday.length / itemsPerPageToday) || 1;
+  currentPageToday = totalPages;
+  updateTableToday();
+};
+async function loadVibhavadiStockMap() {
+  if (Object.keys(vibhavadiStockMap).length > 0) {
+    console.log("ใช้ Cache คลังวิภาวดี");
+    return;
+  }
+
+  const mainSapUrl = `https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap`;
+  
+  try {
+    const res = await fetch(mainSapUrl);
+    const data = await res.json();
+
+    data.forEach(row => {
+      const material = (row.Material || "").toString().trim();
+      const vibhavadi = parseInt(row["วิภาวดี"] || 0, 10);
+      if (material) {
+        vibhavadiStockMap[material] = vibhavadi;
       }
-      searchInputToday.addEventListener("input", () => {
-        currentPageToday = 1; // Reset page on search
-        updateTableToday();
-        showOnlyPending = true;
-toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>ทั้งหมด</span>';
-toggleAllDataBtn.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)";
-      });
+    });
+
+    console.log(`โหลดข้อมูลคลังวิภาวดีสำเร็จ: ${Object.keys(vibhavadiStockMap).length} รายการ`);
+  } catch (err) {
+    console.error("โหลดข้อมูลคลังวิภาวดีล้มเหลว:", err);
+    // ถ้าโหลดไม่ได้ ให้ใช้ค่าเดิมต่อไป
+  }
+}
       async function loadTodayData() {
-        document.getElementById("loading").style.display = "flex";
-        document.getElementById("loadingToday").style.display = "block";
-        errorContainerToday.style.display = "none";
-        console.log("Starting data load from Opensheet:", requestSheetUrl);
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
-          // เพิ่ม cache busting เพื่อให้ข้อมูลใหม่แสดงทันที
-          const cacheBustUrl = `${requestSheetUrl}?_t=${Date.now()}`;
-          const response = await fetch(cacheBustUrl, {
-            signal: controller.signal,
-            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
-            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
-          });
-          clearTimeout(timeoutId);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Today data loaded successfully:", data);
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error("No data received or data is empty");
-          }
-          allDataToday = data;
-          currentPageToday = 1; // Reset page on load
-          updateTableToday();
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("loadingToday").style.display = "none";
-          document.getElementById("data-table-today").style.display = "table";
-          // Fix for mobile scroll after loading
-          setTimeout(() => {
-            document.body.style.overflow = 'auto';
-            if ('ontouchstart' in window) {
-              const event = new Event('touchstart', { bubbles: true });
-              document.body.dispatchEvent(event);
-            }
-          }, 100);
-        } catch (error) {
-          console.error("Error loading today data:", error);
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("loadingToday").style.display = "none";
-          errorContainerToday.style.display = "block";
-          if (error.name === 'AbortError') {
-            document.getElementById("error-message-today").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
-          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
-            document.getElementById("error-message-today").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
-          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            document.getElementById("error-message-today").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
-          } else {
-            document.getElementById("error-message-today").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
-          }
-          Swal.fire({
-            icon: "error",
-            title: "ไม่สามารถโหลดข้อมูล",
-            text: error.name === 'AbortError'
-              ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
-              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
-              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
-              : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
-            confirmButtonText: "ตกลง",
-          });
-        }
-      }
+  // แสดง Loading
+  document.getElementById("loading").style.display = "flex";
+  document.getElementById("loadingToday").style.display = "block";
+  errorContainerToday.style.display = "none";
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // Timeout 30 วินาที
+
+    // โหลดข้อมูลคลังวิภาวดี (MainSap) ก่อนเสมอ แต่โหลดแค่ครั้งเดียว
+    if (Object.keys(vibhavadiStockMap).length === 0) {
+      console.log("กำลังโหลดข้อมูลสต็อกจากคลังวิภาวดี (MainSap)...");
+      await loadVibhavadiStockMap(); // ดึงข้อมูลจริงจาก Sheet
+    } else {
+      console.log("ใช้ Cache สต็อกวิภาวดีแล้ว (เร็วมาก!)");
+    }
+
+    // ดึงข้อมูลรายการเบิกวันนี้ (Request Sheet)
+    const cacheBustUrl = `${requestSheetUrl}?_t=${Date.now()}`;
+    const response = await fetch(cacheBustUrl, {
+      signal: controller.signal,
+      cache: 'no-cache' // บังคับดึงข้อมูลใหม่ทุกครั้ง
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error("ไม่พบข้อมูลการเบิกวันนี้");
+    }
+
+    // บันทึกข้อมูลลงตัวแปร global
+    allDataToday = data;
+    currentPageToday = 1;
+
+    // อัปเดตตาราง (จะดึงสต็อกวิภาวดีจริงมาแสดงอัตโนมัติ)
+    updateTableToday();
+
+    // ซ่อน Loading
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("loadingToday").style.display = "none";
+
+    console.log("โหลดข้อมูลวันนี้สำเร็จ!", data.length, "รายการ");
+
+  } catch (error) {
+    console.error("โหลดข้อมูลวันนี้ล้มเหลว:", error);
+
+    // ซ่อน Loading ทั้งหมด
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("loadingToday").style.display = "none";
+    errorContainerToday.style.display = "block";
+
+    // ข้อความแจ้งเตือนผู้ใช้
+    let msg = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+    if (error.name === 'AbortError') {
+      msg = "การเชื่อมต่อช้าเกินไป กรุณาลองใหม่";
+    } else if (error.message.includes('403') || error.message.includes('CORS')) {
+      msg = "ไม่สามารถเข้าถึง Google Sheets ได้ (ตรวจสอบการแชร์เป็น Public)";
+    } else if (error.message.includes('Failed to fetch')) {
+      msg = "ไม่มีการเชื่อมต่ออินเทอร์เน็ต";
+    }
+
+    document.getElementById("error-message-today").textContent = msg;
+
+    // แจ้งเตือนด้วย SweetAlert
+    Swal.fire({
+      icon: "error",
+      title: "โหลดข้อมูลไม่สำเร็จ",
+      text: msg,
+      confirmButtonText: "ตกลง"
+    });
+  }
+}
       // All tab functions (now after variables)
       closeModalAll.onclick = () => modalAll.style.display = "none";
       window.onclick = event => {
@@ -3277,59 +3602,37 @@ toggleAllDataBtn.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)";
         }).length / itemsPerPagePending);
         filterAndRenderTablePending();
       };
-      async function loadPendingCallsData() {
-        console.log("Starting data load for pending calls from:", urlPending);
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
-          const response = await fetch(urlPending, {
-            signal: controller.signal,
-            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
-            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
-          });
-          clearTimeout(timeoutId);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Pending calls data loaded successfully:", data);
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error("No data received or data is empty");
-          }
-          allDataPending = data;
-          populateTeamFilterPending(allDataPending);
-          addSortListenersPending();
-          filterAndRenderTablePending();
-        } catch (error) {
-          console.error("Error loading pending calls data:", error);
-          if (error.name === 'AbortError') {
-            tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่</td></tr>';
-          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
-            tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)</td></tr>';
-          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่</td></tr>';
-          } else {
-            tableBodyPending.innerHTML = `<tr><td colspan="10" class="pending-text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</td></tr>`;
-          }
-          Swal.fire({
-            icon: "error",
-            title: "ไม่สามารถโหลดข้อมูล",
-            text: error.name === 'AbortError'
-              ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
-              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
-              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
-              : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
-            confirmButtonText: "ตกลง",
-          });
-        }
-      }
+     async function loadPendingCallsData() {
+  console.log("กำลังโหลดข้อมูล Pending Calls...");
+  const cacheKey = "pending-calls-data-v3";
+  try {
+    allDataPending = await getCachedData(cacheKey, async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const res = await fetch(urlPending + "?_=" + Date.now(), { 
+        signal: controller.signal,
+        cache: 'no-cache'
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }, 6);
+
+    populateTeamFilterPending(allDataPending);
+    addSortListenersPending();
+    filterAndRenderTablePending();
+    pendingDataLoaded = true;
+    hideLoading();
+  } catch (error) {
+    console.error("โหลด Pending Calls ล้มเหลว:", error);
+    tableBodyPending.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#e74c3c;">โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่</td></tr>';
+    hideLoading();
+  }
+}
       // Add sort listeners for pending calls
       document.addEventListener('DOMContentLoaded', () => {
         addSortListenersPending();
       });
-      // Initial calls (now safe after all variables defined)
-      loadTheme();
-      checkLoginStatus();
       // Auto-load default data if logged in
       if (appContent.classList.contains('logged-in')) {
         loadData();
@@ -3356,19 +3659,44 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
- // ดึงประกาศล่าสุด ๆ มาแสดงใน Deck
-// ดึงประกาศล่าสุด ๆ มาแสดงใน Deck (ล่าสุดอยู่บนสุด 100%)
+// ========== ฟังก์ชันช่วยสำหรับการจัดการวันที่ไทย ==========
+// ========== ฟังก์ชันช่วยสำหรับการแปลงวันที่ค.ศ. ที่มีเวลา ==========
+function parseDateTimeToJSDate(dateTimeStr) {
+  if (!dateTimeStr || typeof dateTimeStr !== 'string') return null;
+  // รองรับรูปแบบ: "DD/MM/YYYY, HH:mm:ss"
+  const match = dateTimeStr.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}),\s*(\d{1,2}):(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  const [, day, month, year, hour, minute, second] = match;
+  const d = parseInt(day, 10);
+  const m = parseInt(month, 10) - 1; // JS เดือนนับจาก 0
+  const y = parseInt(year, 10);
+  if (y < 2000 || y > 2100 || m < 0 || m > 11 || d < 1 || d > 31) return null;
+  return new Date(y, m, d, parseInt(hour, 10), parseInt(minute, 10), parseInt(second, 10));
+}
+
+function formatDateTimeToThai(dateTimeStr) {
+  const dateObj = parseDateTimeToJSDate(dateTimeStr);
+  if (!dateObj) return "ไม่ระบุวันที่";
+  const d = dateObj.getDate();
+  const m = dateObj.getMonth() + 1; // แปลงกลับเป็น 1–12
+  const yBE = dateObj.getFullYear() + 543;
+  const h = dateObj.getHours().toString().padStart(2, '0');
+  const min = dateObj.getMinutes().toString().padStart(2, '0');
+  const sec = dateObj.getSeconds().toString().padStart(2, '0');
+  const months = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+  return `${d} ${months[m]} ${yBE}, ${h}:${min}:${sec}`;
+}
+
+// ========== แสดงข้อความแจ้งเตือน ==========
 async function openAnnouncementDeck() {
   Swal.fire({
     title: 'กำลังโหลดประกาศ...',
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading()
   });
-
   try {
-    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_=${Date.now()}`);
+    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information`);
     const data = await res.json();
-
     if (!data || data.length === 0) {
       Swal.fire({
         icon: 'info',
@@ -3380,43 +3708,30 @@ async function openAnnouncementDeck() {
       return;
     }
 
-    // ฟิลเตอร์ + เรียงลำดับใหม่ → ล่าสุดอยู่บนสุด 100%
+    // เรียงจากล่าสุด → เก่าสุด (ใช้เวลาจริงจาก timestamp)
     const sorted = data
       .filter(r => r.message && r.message.trim() !== "")
       .sort((a, b) => {
-        // แปลงวันที่ DD/MM/YYYY → YYYY-MM-DD เพื่อ sort ถูกต้อง
-        const dateA = a.updatedAt ? a.updatedAt.trim() : "";
-        const dateB = b.updatedAt ? b.updatedAt.trim() : "";
-
-        if (!dateA) return 1;   // ถ้าไม่มีวันที่ ให้อยู่ล่าง
+        const dateA = parseDateTimeToJSDate(a.updatedAt);
+        const dateB = parseDateTimeToJSDate(b.updatedAt);
+        if (!dateA) return 1;
         if (!dateB) return -1;
-
-        const [d1, m1, y1] = dateA.split('/');
-        const [d2, m2, y2] = dateB.split('/');
-        const isoA = `${y1}-${m1.padStart(2, '0')}-${d1.padStart(2, '0')}`;
-        const isoB = `${y2}-${m2.padStart(2, '0')}-${d2.padStart(2, '0')}`;
-
-        return new Date(isoB) - new Date(isoA); // ใหม่สุดอยู่บน
+        return dateB - dateA; // ใหม่ → เก่า
       });
 
     let html = '<div style="max-height:70vh;overflow-y:auto;padding:4px;">';
-
     sorted.forEach((item, idx) => {
       const subject = (item.subject || "ประกาศ").trim();
       const message = (item.message || "").trim().replace(/\n/g, '<br>');
       const rawDate = item.updatedAt || "";
       const by = item.updatedBy || "Admin";
 
-      // แปลงวันที่ให้สวย: 01/04/2568 → 1 เม.ย. 2568
-      let niceDate = "ไม่ระบุวันที่";
-      if (rawDate && rawDate.includes('/')) {
-        const [d, m, y] = rawDate.split('/');
-        const months = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-        niceDate = `${parseInt(d)} ${months[parseInt(m)]} ${parseInt(y)}`;
-      }
+      // แปลงวันที่ให้สวย (แสดงวันที่ + เวลาเต็ม)
+      const niceDate = formatDateTimeToThai(rawDate);
 
-      const isNew = idx === 0 && rawDate && 
-        (new Date() - new Date(rawDate.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$2-$1'))) / 86400000 <= 2;
+      // เช็คว่าเป็นประกาศใหม่ (ภายใน 2 วัน)
+      const itemDate = parseDateTimeToJSDate(rawDate);
+      const isNew = idx === 0 && itemDate && (Date.now() - itemDate.getTime()) / 86400000 <= 2;
 
       html += `
         <div style="background:#fff;border-radius:16px;margin:12px 0;overflow:hidden;
@@ -3439,7 +3754,6 @@ async function openAnnouncementDeck() {
           </div>
         </div>`;
     });
-
     html += '</div>';
 
     Swal.fire({
@@ -3452,8 +3766,8 @@ async function openAnnouncementDeck() {
       didOpen: () => {
         const badge = document.getElementById('notificationBadge');
         if (sorted.length > 0 && badge) {
-          const latestDate = sorted[0].updatedAt;
-          if (latestDate && (new Date() - new Date(latestDate.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$2-$1'))) / 86400000 <= 2) {
+          const latestDate = parseDateTimeToJSDate(sorted[0].updatedAt);
+          if (latestDate && (Date.now() - latestDate.getTime()) / 86400000 <= 2) {
             badge.style.display = 'flex';
           } else {
             badge.style.display = 'none';
@@ -3461,7 +3775,6 @@ async function openAnnouncementDeck() {
         }
       }
     });
-
   } catch (err) {
     console.error("โหลดประกาศล้มเหลว:", err);
     Swal.fire({
@@ -3470,6 +3783,55 @@ async function openAnnouncementDeck() {
       text: 'กรุณาลองใหม่ในภายหลัง',
       width: '380px'
     });
+  }
+}
+function showImageDetailModal(row) {
+  // 1. ดึง File ID จาก row.UrlWeb
+  let fileId = "";
+  const urlWeb = row.UrlWeb || "";
+  if (urlWeb.includes("/d/")) {
+    fileId = urlWeb.split("/d/")[1].split("/")[0];
+  } else if (urlWeb.includes("id=")) {
+    fileId = urlWeb.split("id=")[1].split("&")[0];
+  } else if (urlWeb.match(/^[a-zA-Z0-9-_]+$/)) {
+    fileId = urlWeb;
+  }
+
+  // 2. สร้าง HTML
+  const imageHtml = fileId ? `
+    <div style="text-align:center; margin-bottom:20px;">
+      <img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w500"
+           alt="รูปใหญ่"
+           style="max-width:100%; max-height:300px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.2);">
+    </div>
+  ` : '';
+
+  const detailHtml = `
+    ${imageHtml}
+    <div style="font-size:16px; line-height:1.6;">
+      <div><strong>Material:</strong> ${row.Material || '-'}</div>
+      <div><strong>Description:</strong> ${row.Description || '-'}</div>
+      <div><strong>วิภาวดี:</strong> ${(parseFloat(row.วิภาวดี) || 0).toLocaleString()} ชิ้น</div>
+      <div><strong>Unrestricted:</strong> ${(parseFloat(row.Unrestricted) || 0).toLocaleString()} ชิ้น</div>
+      <div><strong>Rebuilt:</strong> ${row.Rebuilt || '-'}</div>
+      <div><strong>หมายเหตุ:</strong> <span style="color:#d32f2f; font-weight:bold;">${row.หมายเหตุ || '-'}</span></div>
+      <div><strong>Product:</strong> ${row.Product || '-'}</div>
+      <div><strong>OCRTAXT:</strong> ${row.OCRTAXT || '-'}</div>
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="requisition-button" style="padding:8px 24px;" 
+              onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
+        เบิกเลย
+      </button>
+    </div>
+  `;
+
+  // 3. แสดง modal
+  const imageModal = document.getElementById("imageModal");
+  const imageModalContent = document.getElementById("imageModalContent");
+  if (imageModal && imageModalContent) {
+    imageModalContent.innerHTML = detailHtml;
+    imageModal.style.display = "block";
   }
 }
 // ===== PWA ติดตั้ง – เวอร์ชันแก้หายขาด 100% (2025) =====
@@ -3540,7 +3902,7 @@ setTimeout(() => {
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   Swal.fire({
-    title: '<i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน',
+    title: '<i class="fas fa-bullhorn"></i> บันทึกข้อความแจ้งเตือน',
     html: `
       <!-- ช่องกรอกหัวเรื่อง -->
       <div style="text-align:left; margin-bottom:8px;">
@@ -3577,7 +3939,7 @@ function openAnnouncementEditor() {
     width: '700px',
     padding: '20px',
     showCancelButton: true,
-    confirmButtonText: '<i class="fas fa-paper-plane"></i> บันทึกประกาศ',
+    confirmButtonText: '<i class="fas fa-paper-plane"></i> บันทึก',
     cancelButtonText: 'ยกเลิก',
     allowOutsideClick: false,
     allowEscapeKey: false,
@@ -3650,6 +4012,17 @@ function openAnnouncementEditor() {
     }
   });
 }
+document.addEventListener('DOMContentLoaded', () => {
+  // Close modals by clicking 'X'
+  closeModal.addEventListener('click', () => modal.style.display = 'none');
+  closeModalAll.addEventListener('click', () => modalAll.style.display = 'none');
+  closeModalPending.addEventListener('click', () => modalPending.style.display = 'none');
+
+  // Close modals by clicking backdrop
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+  modalAll.addEventListener('click', (e) => { if (e.target === modalAll) modalAll.style.display = 'none'; });
+  modalPending.addEventListener('click', (e) => { if (e.target === modalPending) modalPending.style.display = 'none'; });
+});      
  // ลบปุ่มออกจาก DOM ถาวรทันทีที่ติดตั้ง
 window.addEventListener('appinstalled', () => {
   localStorage.setItem('partgo-installed', 'true');
@@ -3666,6 +4039,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.remove();
   }
 });
+      // Initial calls (now safe after all variables defined)
+      loadTheme();
+      checkLoginStatus();
     </script>
   </body>
 </html>
